@@ -1,0 +1,81 @@
+server:
+  port: 0
+spring:
+  r2dbc:
+    url: r2dbc:postgresql://localhost:xxx/acceptance-test-db
+    username: sa
+    password: sa
+  mail:
+    host: 127.0.0.1
+    port: 0
+    username: job-alert-sender@localhost
+    password: 12345678
+  flyway:
+    user: sa
+    password: sa
+    url: jdbc:postgresql://localhost:xxx/acceptance-test-db
+  task:
+    scheduling:
+      pool:
+        size: 2
+
+management:
+  health:
+    probes:
+      enabled: true
+    r2dbc:
+      enabled: true
+    mail:
+      enabled: true
+    telegram:
+      enabled: true
+    db:
+      enabled: false
+    diskSpace:
+      enabled: false
+    ping:
+      enabled: false
+  endpoint:
+    info:
+      enabled: true
+    health:
+      show-components: always
+      show-details: never
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+application:
+  scheduler:
+    weekly:
+      cron: '-'
+      zone: Europe/Madrid
+    periodic:
+      cron: '-'
+      zone: Europe/Madrid
+    health:
+      delay: 1000
+
+sites:
+  - name: JobSite1
+    url: http://localhost:xxx/job-site-1
+    strategy:
+      type: basicHtml
+      steps: ul.menu_pag,li,a
+    notifications:
+      - type: telegram
+        recipients:
+          - chatId1
+      - type: email
+        recipients:
+          - job-alert-recipient@localhost
+
+email:
+  enabled: true
+  from: job-alert-sender@localhost
+
+telegram:
+  enabled: true
+  baseUrl: http://localhost:xxxx
+  botKey: 1234:abcd

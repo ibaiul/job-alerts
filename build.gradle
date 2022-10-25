@@ -1,0 +1,61 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version "$springBootVersion"
+    id 'jacoco'
+    id 'com.gorylenko.gradle-git-properties' version "$gitPropertiesVersion"
+}
+
+group 'eus.ibai'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+
+    implementation "org.springframework.boot:spring-boot-starter-webflux:$springBootVersion"
+    implementation "org.springframework.boot:spring-boot-starter-data-r2dbc:$springBootVersion"
+    implementation "org.springframework.boot:spring-boot-starter-mail:$springBootVersion"
+    implementation "org.springframework.boot:spring-boot-starter-actuator:$springBootVersion"
+    runtimeOnly "org.postgresql:postgresql:$postgresqlVersion"
+    runtimeOnly ("io.r2dbc:r2dbc-postgresql:$r2dbcVersion") {
+        exclude group: "io.projectreactor.netty", module: "reactor-netty"
+    }
+    implementation "org.flywaydb:flyway-core:$flywayVersion"
+    implementation "org.jsoup:jsoup:$jsoupVersion"
+    implementation "com.vdurmont:emoji-java:$emojiVersion"
+
+
+    testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+    testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
+
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+    testImplementation "org.springframework.boot:spring-boot-starter-test:$springBootVersion"
+    testImplementation "org.awaitility:awaitility:$awaitilityVersion"
+    testImplementation "com.github.tomakehurst:wiremock-jre8:$wiremockVersion"
+    testImplementation "com.icegreen:greenmail:$greenmailVersion"
+    testImplementation "org.testcontainers:postgresql:$testcontainersVersion"
+    testImplementation "io.projectreactor:reactor-test:$reactorVersion"
+}
+
+springBoot {
+    buildInfo()
+}
+
+test {
+    useJUnitPlatform()
+    finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = false
+        csv.required = false
+        html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
+    }
+}

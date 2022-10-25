@@ -1,0 +1,76 @@
+version: "3.7"
+
+services:
+
+  db:
+    container_name: job-alerts-db
+    image: postgres:13.8
+    restart: always
+    environment:
+      - POSTGRES_USER=sa
+      - POSTGRES_PASSWORD=sa
+      - POSTGRES_DB=local-db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/data/db
+    networks:
+      - job-alerts-net
+
+  mail:
+    container_name: job-alerts-mail
+    image: ibaiul/greenmail
+    pull_policy: always
+    ports:
+      - "18081:8080"
+      - "3025:3025"
+    networks:
+      - job-alerts-net
+
+  telegram:
+    container_name: job-alerts-telegram
+    image: wiremock/wiremock:2.34.0
+    ports:
+      - "18080:8080"
+    volumes:
+      - ./wiremock:/home/wiremock
+    networks:
+      - job-alerts-net
+
+  app:
+    container_name: job-alerts-app
+    image: ibaiul/job-alerts-local
+    env_file: env.conf
+    depends_on:
+      - db
+      - mail
+      - telegram
+    networks:
+      - job-alerts-net
+
+#  db-ui:
+#    container_name: job-alerts-db-ui
+#    image: dpage/pgadmin4
+#    restart: always
+#    environment:
+#      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+#      PGADMIN_DEFAULT_PASSWORD: password
+#    ports:
+#      - "5050:80"
+#    volumes:
+#      - pgadmin_data:/data/pgadmin
+#    depends_on:
+#      - db
+#    logging:
+#      driver: none
+#    networks:
+#      - job-alerts-net
+
+volumes:
+  postgres_data:
+  pgadmin_data:
+
+networks:
+  job-alerts-net:
+    name: job-alerts-net
+    driver: bridge

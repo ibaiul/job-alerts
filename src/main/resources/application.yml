@@ -1,0 +1,128 @@
+server:
+  port: 8080
+spring:
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/local-db
+    username: sa
+    password: sa
+  mail:
+    host: localhost
+    port: 3025
+    username: job-alert-sender@localhost
+    password: 12345678
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+  flyway:
+    url: jdbc:postgresql://localhost:5432/local-db
+    user: sa
+    password: sa
+  task:
+    scheduling:
+      pool:
+        size: 2
+
+management:
+  health:
+    probes:
+      enabled: true
+    r2dbc:
+      enabled: true
+    mail:
+      enabled: true
+    telegram:
+      enabled: true
+    db:
+      enabled: false
+    diskSpace:
+      enabled: false
+    ping:
+      enabled: false
+  endpoint:
+    info:
+      enabled: true
+    health:
+      show-components: always
+      show-details: never
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+application:
+  scheduler:
+    weekly:
+      cron: '-'
+      zone: Europe/Madrid
+    periodic:
+      cron: '-'
+      zone: Europe/Madrid
+    health:
+      delay: 60000
+
+sites:
+  - name: 'UCM: Profesor Ayudante Doctor'
+    url: https://www.ucm.es/profesor-ayudante-doctor
+    strategy:
+      type: basicHtml
+      steps: ul.menu_pag,li,a
+    notifications:
+      - type: telegram
+        recipients:
+          - chat1
+      - type: email
+        recipients:
+          - job-alert-receiver@localhost
+  - name: 'Carlos III: Postdoctorales'
+    url: https://www.uc3m.es/empleo/pdi
+    strategy:
+      type: basicHtml
+      steps: div#list7,a
+  - name: 'UAM: Personal Docente Investigador'
+    url: https://www.uam.es/uam/pdi/acceso-plazas-docentes
+    strategy:
+      type: basicHtml
+      steps: a.uam-becas-card
+  - name: 'UAH: Personal Docente Investigador'
+    url: https://www.uah.es/es/empleo-publico/PDI/convocatoria/
+    strategy:
+      type: basicHtml
+      steps: ul.main-ul,h4,a
+  - name: 'URJC: Profesor Ayudante Doctor'
+    url: https://www.urjc.es/empleo-publico#profesor-ayudante-doctor
+    strategy:
+      type: basicHtml
+      steps: div#profesor-ayudante-doctor,a.accordion-toggle
+  - name: 'UCJC: Jobs'
+    url: https://empleo.sek.es/jobs?department=Universidad+Camilo+José+Cela&location=Madrid,+España+&query=
+    strategy:
+      type: basicHtml
+      steps: li.w-full,a.flex
+  - name: 'UPNA: Personal Docente Investigador'
+    url: https://sedeelectronica.unavarra.es/sede/tablon-electronico/empleo-publico/convocatorias-pdi?submenu=yes&opcion=1
+    strategy:
+      type: basicHtml
+      steps: ul.listadoActualidad,a
+  - name: 'UNED: Personal Docente Investigador'
+    url: https://portal.uned.es/portal/page?_pageid=93,671025&_dad=portal&_schema=PORTAL
+    strategy:
+      type: basicHtml
+      steps: h2
+
+email:
+  enabled: true
+  from: job-alert-sender@localhost
+
+telegram:
+  enabled: true
+  baseUrl: http://localhost:18080
+  botKey: 1234:abcd
+
+info:
+  app:
+    name: Job Alerts
+    description: Check job sites periodically to alert about new job openings
+    version: 1.0.0
