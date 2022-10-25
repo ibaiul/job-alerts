@@ -35,4 +35,19 @@ jobs:
       - name: Package
         run: ./gradlew bootJar
 
-      # TODO Push to DockerHub
+      - name: Login to DockerHub
+        if: github.event_name == 'pull_request'
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_HUB_USER }}
+          password: ${{ secrets.DOCKER_HUB_PASS }}
+
+      - name: Docker Publish Beta
+        if: github.event_name == 'pull_request'
+        uses: docker/build-push-action@v2
+        env:
+          IMAGE_NAME: ${{ secrets.DOCKER_HUB_IMAGE }}
+        with:
+          context: .
+          tags: ${{ env.IMAGE_NAME }}:${{ github.sha }},${{ env.IMAGE_NAME }}:beta
+          push: true
