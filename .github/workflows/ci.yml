@@ -44,7 +44,7 @@ jobs:
 
       - name: Docker Publish Beta
         if: github.event_name == 'pull_request'
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         env:
           IMAGE_NAME: ${{ secrets.DOCKER_HUB_IMAGE }}
         with:
