@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up Java
         uses: actions/setup-java@v3
@@ -43,18 +43,29 @@ jobs:
         run: ./gradlew bootJar
 
       - name: Login to DockerHub
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' || github.ref == 'refs/heads/master'
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_HUB_USER }}
           password: ${{ secrets.DOCKER_HUB_PASS }}
 
-      - name: Docker Publish Beta
-        if: github.event_name == 'pull_request'
+      - name: Set docker image release tag
+        if: github.event_name == 'pull_request' || github.ref == 'refs/heads/master'
+        run: |
+          if [ ${{ github.ref }} == 'refs/heads/master' ]; then
+            echo "Setting latest release tag"
+            echo "RELEASE_TAG=latest" >> $GITHUB_ENV
+          else
+            echo "Setting beta release tag"
+            echo "RELEASE_TAG=beta" >> $GITHUB_ENV
+          fi
+
+      - name: Docker Publish
+        if: github.event_name == 'pull_request' || github.ref == 'refs/heads/master'
         uses: docker/build-push-action@v3
         env:
           IMAGE_NAME: ${{ secrets.DOCKER_HUB_IMAGE }}
         with:
           context: .
-          tags: ${{ env.IMAGE_NAME }}:${{ github.sha }},${{ env.IMAGE_NAME }}:beta
+          tags: ${{ env.IMAGE_NAME }}:${{ github.sha }},${{ env.IMAGE_NAME }}:${{ env.RELEASE_TAG }}
           push: true
