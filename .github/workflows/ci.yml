@@ -30,7 +30,14 @@ jobs:
       - name: Test
         run: ./gradlew test
 
-      # TODO Integrate Sonar
+      - name: Sonar
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
+          SONAR_PROJECT: ${{ secrets.SONAR_PROJECT }}
+        run: |
+          BRANCH_NAME=$(echo ${GITHUB_REF} | sed 's/refs\///g' | sed 's/heads\///g' | sed 's/\/merge//g' | sed 's/pull\//PR-/g')
+          ./gradlew sonar -Dsonar.login=${SONAR_TOKEN}  -Dsonar.branch.name=${BRANCH_NAME} -Dsonar.organization=${SONAR_ORGANIZATION} -Dsonar.projectKey=${SONAR_PROJECT}
 
       - name: Package
         run: ./gradlew bootJar
