@@ -1,4 +1,4 @@
-name: Healthcheck PROD (AWS)
+name: Healthcheck DEV (AWS)
 
 on:
   schedule:
@@ -8,18 +8,17 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
-
     steps:
       - name: Get Date
         id: get-date
         run: |
-          echo "::set-output name=date::$(/bin/date -u "+%Y%m%d%H%M%S")"
+          echo "CACHE_KEY_SUFFIX=$(/bin/date -u '+%Y%m%d%H%M%S')" >> $GITHUB_ENV
       - name: Get previous state
         id: cache-state
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: health/status
-          key: healthcheck-dev-aws-${{ steps.get-date.outputs.date }}
+          key: healthcheck-dev-aws-${{ env.CACHE_KEY_SUFFIX }}
           restore-keys: |
             healthcheck-dev-aws-
       - name: Healthcheck
@@ -29,31 +28,28 @@ jobs:
         run: |
           mkdir -p health/status
           test -f health/status/dev-aws || echo "UNKNOWN" > health/status/dev-aws
-          echo "::set-output name=previous::$(cat health/status/dev-aws)"
+          PREVIOUS_STATE=$(cat health/status/dev-aws)
+          echo "Previous state: ${PREVIOUS_STATE}"
           HTTP_STATUS=$(curl -L -w "%{http_code}" -o /dev/null -s ${HEALTH_URL})
-          [[ $HTTP_STATUS = 200 ]] && CURRENT="UP" || CURRENT="DOWN"
-          #CURRENT="DOWN"
-          echo "$CURRENT" > health/status/dev-aws
-          echo "::set-output name=current::$(cat health/status/dev-aws)"
-      - name: Compare status
-        id: comparison
-        env:
-          PREVIOUS: ${{ steps.healthcheck.outputs.previous }}
-          CURRENT: ${{ steps.healthcheck.outputs.current }}
-        run: |
-          echo "Previous status: $PREVIOUS"
-          echo "Latest status: $CURRENT"
-          if [ "$CURRENT" != "$PREVIOUS" ]; then
+          [[ $HTTP_STATUS = 200 ]] && CURRENT_STATE="UP" || CURRENT_STATE="DOWN"
+          echo "Current state: ${CURRENT_STATE}"
+          echo "${CURRENT_STATE}" > health/status/dev-aws
+          echo "CURRENT_STATE=$(cat health/status/dev-aws)" >> $GITHUB_ENV
+          if [ "${CURRENT_STATE}" != "${PREVIOUS_STATE}" ]; then
             echo "Send alert."
-            echo "::set-output name=notify::$CURRENT"
+            echo "NOTIFY=true" >> $GITHUB_ENV
           fi
       - name: Notify
-        if: steps.comparison.outputs.notify
+        if: env.NOTIFY
         env:
-          CURRENT: ${{ steps.healthcheck.outputs.current }}
           CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         run: |
-          echo "Notify: $CURRENT"
-          TEXT="PROD environment is $CURRENT. (AWS)"
-          curl -H 'Content-Type: application/json' -d '{"chat_id":"'"$CHAT_ID"'","text":"'"$TEXT"'"}' https://api.telegram.org/bot$BOT_TOKEN/sendMessage
+          echo "Notify current state: ${{ env.CURRENT_STATE }}"
+          TEXT="DEV environment is ${CURRENT_STATE}. (AWS)"
+          HTTP_STATUS=$(curl -L -w "%{http_code}" -o /dev/null -s -H 'Content-Type: application/json' -d '{"chat_id":"'"$CHAT_ID"'","text":"'"$TEXT"'"}' https://api.telegram.org/bot$BOT_TOKEN/sendMessage)
+          if [ $HTTP_STATUS = 200 ]; then
+            echo "Alert sent"
+          else
+            echo "Failed to send alert. HTTP STATUS: ${HTTP_STATUS}" 
+          fi
