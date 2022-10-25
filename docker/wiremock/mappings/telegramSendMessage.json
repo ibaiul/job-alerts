@@ -1,0 +1,70 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "/bot1234:abcd/sendMessage",
+    "headers": {
+      "Content-Type": {
+        "equalTo": "application/json"
+      }
+    },
+    "bodyPatterns" : [
+      {
+        "matchesJsonPath" : {
+          "expression" : "$.chat_id",
+          "equalTo" : "chat1"
+        }
+      },
+      {
+        "matchesJsonPath" : {
+          "expression" : "$.parse_mode",
+          "equalTo" : "html"
+        }
+      },
+      {
+        "matchesJsonPath" : {
+          "expression" : "$.disable_web_page_preview",
+          "equalTo" : "true"
+        }
+      },
+      {
+        "matchesJsonPath" : {
+          "expression" : "$.disable_notification",
+          "equalTo" : "true"
+        }
+      },
+      {
+        "matchesJsonPath" : {
+          "expression" : "$.text",
+          "matches" : ".+"
+        }
+      }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "ok": true,
+      "result": {
+        "message_id": 132,
+        "sender_chat": {
+          "id": "chat1",
+          "title": "ChatTitle",
+          "username": "chatUser",
+          "type": "channel"
+        },
+        "chat": {
+          "id": "chat1",
+          "title": "ChatTitle",
+          "username": "ChatUser",
+          "type": "channel"
+        },
+        "date": 0,
+        "text": "Mock message",
+        "entities": []
+      }
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

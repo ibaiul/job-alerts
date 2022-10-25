@@ -1,0 +1,11 @@
+spring:
+  r2dbc:
+    url: r2dbc:postgresql://db:5432/local-db
+  mail:
+    host: mail
+    port: 3025
+  flyway:
+    url: jdbc:postgresql://db:5432/local-db
+
+telegram:
+  baseUrl: http://telegram:8080
