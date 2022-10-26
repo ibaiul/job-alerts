@@ -27,6 +27,16 @@ jobs:
         with:
           gradle-version: 7.3
 
+      - name: Set up variables
+        run: |
+          if [ ${{ github.ref }} == 'refs/heads/master' ]; then
+            echo "RELEASE_TAG=latest" >> $GITHUB_ENV
+            echo "SNYK_ACTION=monitor" >> $GITHUB_ENV
+          else
+            echo "RELEASE_TAG=beta" >> $GITHUB_ENV
+            echo "SNYK_ACTION=test" >> $GITHUB_ENV
+          fi
+
       - name: Test
         run: ./gradlew test
 
@@ -47,7 +57,7 @@ jobs:
           SNYK_PROJECT: ${{ secrets.SNYK_PROJECT }}
         with:
           args: --all-projects --severity-threshold=high --policy-path=. --project-name=${SNYK_PROJECT} --org=${SNYK_ORGANIZATION}
-          command: test
+          command: ${{ env.SNYK_ACTION }}
 
       - name: Package
         run: ./gradlew bootJar
@@ -58,17 +68,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_HUB_USER }}
           password: ${{ secrets.DOCKER_HUB_PASS }}
-
-      - name: Set docker image release tag
-        if: github.event_name == 'pull_request' || github.ref == 'refs/heads/master'
-        run: |
-          if [ ${{ github.ref }} == 'refs/heads/master' ]; then
-            echo "Setting latest release tag"
-            echo "RELEASE_TAG=latest" >> $GITHUB_ENV
-          else
-            echo "Setting beta release tag"
-            echo "RELEASE_TAG=beta" >> $GITHUB_ENV
-          fi
 
       - name: Docker Publish
         if: github.event_name == 'pull_request' || github.ref == 'refs/heads/master'
