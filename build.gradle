@@ -29,6 +29,9 @@ dependencies {
     implementation "org.jsoup:jsoup:$jsoupVersion"
     implementation "com.vdurmont:emoji-java:$emojiVersion"
 
+    // Version fixes for transient dependencies with vulnerabilities
+    implementation "org.yaml:snakeyaml:1.33"
+    implementation 'org.json:json:20220924'
 
     testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
     testCompileOnly "org.projectlombok:lombok:${lombokVersion}"

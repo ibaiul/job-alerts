@@ -1,0 +1,4 @@
+ignore:
+  SNYK-JAVA-IONETTY-1042268:
+    - '*':
+      reason: 'No affected as Reactor Netty has explicitly enabled hostname verification by default.'
