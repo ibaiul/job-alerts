@@ -1,3 +1,7 @@
+[![CI](https://github.com/ibaiul/job-alerts/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/ibaiul/job-alerts/actions/workflows/ci.yml)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=job-alerts&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=job-alerts)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=job-alerts&metric=coverage)](https://sonarcloud.io/dashboard?id=job-alerts)
+
 # Job Alerts
 
 ### Context
