@@ -27,6 +27,16 @@ jobs:
         with:
           gradle-version: 7.3
 
+      - name: Set up variables
+        run: |
+          if [ ${{ github.ref }} == 'refs/heads/master' ]; then
+            echo "RELEASE_TAG=latest" >> $GITHUB_ENV
+            echo "SNYK_ACTION=monitor" >> $GITHUB_ENV
+          else
+            echo "RELEASE_TAG=beta" >> $GITHUB_ENV
+            echo "SNYK_ACTION=test" >> $GITHUB_ENV
+          fi
+
       - name: Test
         run: ./gradlew test
 
@@ -42,23 +52,46 @@ jobs:
       - name: Package
         run: ./gradlew bootJar
 
+      - name: Scan Dependencies
+        uses: snyk/actions/gradle-jdk17@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          SNYK_ORGANIZATION: ${{ secrets.SNYK_ORGANIZATION }}
+          SNYK_PROJECT: ${{ secrets.SNYK_PROJECT }}
+          JAVA_HOME: /opt/java/openjdk
+        with:
+          args: --severity-threshold=high --policy-path=. --project-name=${SNYK_PROJECT} --org=${SNYK_ORGANIZATION}
+          command: ${{ env.SNYK_ACTION }}
+
+      - name: Build Docker image
+        if: github.event_name == 'pull_request' || github.ref == 'refs/heads/master'
+        uses: docker/build-push-action@v3
+        env:
+          IMAGE_NAME: ${{ secrets.DOCKER_HUB_IMAGE }}
+        with:
+          context: .
+          tags: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+          load: true
+          push: false
+
+      - name: Scan Docker image
+        uses: snyk/actions/docker@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          SNYK_ORGANIZATION: ${{ secrets.SNYK_ORGANIZATION }}
+          SNYK_PROJECT: ${{ secrets.SNYK_PROJECT }}
+          IMAGE_NAME: ${{ secrets.DOCKER_HUB_IMAGE }}
+        with:
+          image: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+          args: --file=Dockerfile --severity-threshold=high --policy-path=. --project-name=${SNYK_PROJECT}-docker --org=${SNYK_ORGANIZATION}
+          command: ${{ env.SNYK_ACTION }}
+
       - name: Login to DockerHub
         if: github.event_name == 'pull_request' || github.ref == 'refs/heads/master'
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_HUB_USER }}
           password: ${{ secrets.DOCKER_HUB_PASS }}
-
-      - name: Set docker image release tag
-        if: github.event_name == 'pull_request' || github.ref == 'refs/heads/master'
-        run: |
-          if [ ${{ github.ref }} == 'refs/heads/master' ]; then
-            echo "Setting latest release tag"
-            echo "RELEASE_TAG=latest" >> $GITHUB_ENV
-          else
-            echo "Setting beta release tag"
-            echo "RELEASE_TAG=beta" >> $GITHUB_ENV
-          fi
 
       - name: Docker Publish
         if: github.event_name == 'pull_request' || github.ref == 'refs/heads/master'
