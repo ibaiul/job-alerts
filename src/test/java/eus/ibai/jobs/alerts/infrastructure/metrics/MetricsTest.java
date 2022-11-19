@@ -17,6 +17,6 @@ class MetricsTest extends AcceptanceTest {
         int expectedMinRequests = 2;
         int waitInSeconds = metricStepInSeconds * expectedMinRequests + 1;
 
-        await().atMost(waitInSeconds, SECONDS).untilAsserted(() -> verifyMetricsSentAtLeast(expectedMinRequests));
+        await().atMost(waitInSeconds, SECONDS).ignoreExceptions().untilAsserted(() -> verifyMetricsSentAtLeast(expectedMinRequests));
     }
 }
