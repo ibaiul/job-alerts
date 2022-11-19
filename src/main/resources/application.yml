@@ -121,6 +121,16 @@ telegram:
   baseUrl: http://localhost:18080
   botKey: 1234:abcd
 
+newrelic:
+  app:
+    name: JobAlerts_local - Micrometer
+  metric:
+    step: 10
+    ingest:
+      uri: http://localhost:18080/metric/v1
+  key:
+    license: licenseKey
+
 info:
   app:
     name: Job Alerts

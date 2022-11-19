@@ -7,6 +7,7 @@ import eus.ibai.jobs.alerts.infrastructure.email.GreenMailContainer;
 import eus.ibai.jobs.alerts.infrastructure.email.TestMimeMessage;
 import eus.ibai.jobs.alerts.infrastructure.repository.JobEntityRepository;
 import eus.ibai.jobs.alerts.infrastructure.repository.JobSiteEntityRepository;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -32,9 +33,13 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class AcceptanceTest {
 
-    private static final String TELEGRAM_SEND_MESSAGE_URL = "/bot1234:abcd/sendMessage";
+    private static final String TELEGRAM_SEND_MESSAGE_ENDPOINT = "/bot1234:abcd/sendMessage";
 
-    private static final String TELEGRAM_GET_UPDATES_URL = "/bot1234:abcd/getUpdates";
+    private static final String TELEGRAM_GET_UPDATES_ENDPOINT = "/bot1234:abcd/getUpdates";
+
+    private static final String NEW_RELIC_METRIC_INGEST_ENDPOINT = "/metric/v1";
+
+    private static final String NEW_RELIC_METRIC_INGEST_URI_FORMAT = "%s" + NEW_RELIC_METRIC_INGEST_ENDPOINT;
 
     private static final int POSTGRES_PORT = 5432;
 
@@ -70,6 +75,9 @@ public class AcceptanceTest {
     @Autowired
     private JobSiteRegistration jobSiteRegistration;
 
+    @Autowired
+    private MeterRegistry meterRegistry;
+
     @BeforeAll
     static void beforeAll() {
         log.debug("Before all");
@@ -82,12 +90,14 @@ public class AcceptanceTest {
         stubJobSite1Ok();
         stubTelegramGetUpdatesSuccessResponse();
         stubTelegramSendMessageSuccessResponse(VALID_CHAT_ID);
+        stubNewRelicSendMetricResponse(202, NEW_RELIC_SEND_METRICS_SUCCESS_RESPONSE);
     }
 
     @AfterEach
     void afterEach() {
         log.debug("After each");
         wiremock.resetAll();
+        meterRegistry.clear();
         StepVerifier.create(greenMailClient.purgeEmailFromAllMailboxes())
                 .verifyComplete();
         StepVerifier.create(jobEntityRepository.deleteAll())
@@ -111,6 +121,7 @@ public class AcceptanceTest {
         registry.add("spring.flyway.url", postgreSqlContainer::getJdbcUrl);
         registry.add("spring.mail.port", smtpContainer::getMappedSmtpPort);
         registry.add("telegram.baseUrl", wiremock::baseUrl);
+        registry.add("newrelic.metric.ingest.uri", () -> format(NEW_RELIC_METRIC_INGEST_URI_FORMAT, wiremock.baseUrl()));
         registry.add("sites[0].name", () -> JOB_SITE_1_NAME);
         registry.add("sites[0].url", () -> format(JOB_SITE_1_URL_FORMAT, wiremock.baseUrl()));
         registry.add("sites[0].strategy.type", () -> "basicHtml");
@@ -134,7 +145,7 @@ public class AcceptanceTest {
     }
 
     private static void stubTelegramGetUpdatesResponse(int statusCode, String response) {
-        wiremock.stubFor(get(urlMatching(TELEGRAM_GET_UPDATES_URL))
+        wiremock.stubFor(get(urlMatching(TELEGRAM_GET_UPDATES_ENDPOINT))
                 .willReturn(aResponse()
                         .withStatus(statusCode)
                         .withHeader("Content-Type", "application/json")
@@ -154,13 +165,23 @@ public class AcceptanceTest {
     }
 
     private static void stubTelegramSendMessageResponse(String chatId, String message, int statusCode, String response) {
-        wiremock.stubFor(post(urlEqualTo(TELEGRAM_SEND_MESSAGE_URL))
+        wiremock.stubFor(post(urlEqualTo(TELEGRAM_SEND_MESSAGE_ENDPOINT))
                 .withHeader(HttpHeaders.CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
                 .withRequestBody(matchingJsonPath("$.chat_id", equalTo(chatId)))
                 .withRequestBody(matchingJsonPath("$.parse_mode", equalTo("html")))
                 .withRequestBody(matchingJsonPath("$.disable_web_page_preview", equalTo("true")))
                 .withRequestBody(matchingJsonPath("$.disable_notification", equalTo("true")))
                 .withRequestBody(matchingJsonPath("$.text", matching(message)))
+                .willReturn(aResponse()
+                        .withStatus(statusCode)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(response)));
+    }
+
+    private static void stubNewRelicSendMetricResponse(int statusCode, String response) {
+        wiremock.stubFor(post(urlEqualTo(NEW_RELIC_METRIC_INGEST_ENDPOINT))
+                .withHeader(HttpHeaders.CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
+                .withRequestBody(matching(".+"))
                 .willReturn(aResponse()
                         .withStatus(statusCode)
                         .withHeader("Content-Type", "application/json")
@@ -180,7 +201,7 @@ public class AcceptanceTest {
     }
 
     protected void verifyTelegramMessageSent(String chatId, int count) {
-        wiremock.verify(exactly(count), postRequestedFor(urlEqualTo(TELEGRAM_SEND_MESSAGE_URL))
+        wiremock.verify(exactly(count), postRequestedFor(urlEqualTo(TELEGRAM_SEND_MESSAGE_ENDPOINT))
                 .withHeader(HttpHeaders.CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
                 .withRequestBody(matchingJsonPath("$.chat_id", equalTo(chatId)))
                 .withRequestBody(matchingJsonPath("$.parse_mode", equalTo("html")))
@@ -190,7 +211,7 @@ public class AcceptanceTest {
     }
 
     protected void verifyTelegramMessageSent(String chatId, String message) {
-        wiremock.verify(exactly(1), postRequestedFor(urlEqualTo(TELEGRAM_SEND_MESSAGE_URL))
+        wiremock.verify(exactly(1), postRequestedFor(urlEqualTo(TELEGRAM_SEND_MESSAGE_ENDPOINT))
                 .withHeader(HttpHeaders.CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
                 .withRequestBody(matchingJsonPath("$.chat_id", equalTo(chatId)))
                 .withRequestBody(matchingJsonPath("$.parse_mode", equalTo("html")))
@@ -200,7 +221,7 @@ public class AcceptanceTest {
     }
 
     protected void verifyNoTelegramMessageSent() {
-        wiremock.verify(exactly(0), postRequestedFor(urlEqualTo(TELEGRAM_SEND_MESSAGE_URL)));
+        wiremock.verify(exactly(0), postRequestedFor(urlEqualTo(TELEGRAM_SEND_MESSAGE_ENDPOINT)));
     }
 
     protected void verifyEmailSent(String recipient, String subject) {
@@ -219,6 +240,17 @@ public class AcceptanceTest {
     protected void verifyNoEmailSent() {
         StepVerifier.create(greenMailClient.getAllEmails())
                 .verifyComplete();
+    }
+
+    protected void verifyMetricsSentAtLeast(int times) {
+        wiremock.verify(moreThanOrExactly(times), postRequestedFor(urlEqualTo(NEW_RELIC_METRIC_INGEST_ENDPOINT))
+                .withHeader(HttpHeaders.CONTENT_TYPE, equalTo("application/json; charset=UTF-8"))
+                .withRequestBody(matchingJsonPath("$[0].common.attributes", containing("service.name")))
+                .withRequestBody(matchingJsonPath("$[0].common.attributes", containing("JobAlerts_test - Micrometer")))
+                .withRequestBody(matchingJsonPath("$[0].common.attributes", containing("collector.name")))
+                .withRequestBody(matchingJsonPath("$[0].common.attributes", containing("micrometer-registry-newrelic")))
+                .withRequestBody(matchingJsonPath("$[0].metrics", matching(".+")))
+        );
     }
 
     protected String wiremockBaseUrl() {

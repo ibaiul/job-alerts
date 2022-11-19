@@ -79,3 +79,13 @@ telegram:
   enabled: true
   baseUrl: http://localhost:xxxx
   botKey: 1234:abcd
+
+newrelic:
+  app:
+    name: JobAlerts_test - Micrometer
+  metric:
+    step: 1
+    ingest:
+      uri: http://localhost:xxxx/metric/v1
+  key:
+    license: licenseKey

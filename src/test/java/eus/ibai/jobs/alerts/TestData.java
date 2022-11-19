@@ -74,6 +74,12 @@ public class TestData {
             }
             """;
 
+    public static final String NEW_RELIC_SEND_METRICS_SUCCESS_RESPONSE = """
+            {
+              "requestId": "00000000-0000-0000-0000-000000000000"
+            }
+            """;
+
     public static final String JOB_SITE_1_NAME = "JobSite1";
 
     public static final String JOB_SITE_1_URL_FORMAT = "%s/job-site-1";

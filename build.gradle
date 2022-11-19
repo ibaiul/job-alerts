@@ -28,6 +28,8 @@ dependencies {
     implementation "org.flywaydb:flyway-core:$flywayVersion"
     implementation "org.jsoup:jsoup:$jsoupVersion"
     implementation "com.vdurmont:emoji-java:$emojiVersion"
+    implementation "com.newrelic.telemetry:micrometer-registry-new-relic:$newrelicVersion"
+    implementation "io.micrometer:micrometer-core:$micrometerVersion"
 
     // Version fixes for transient dependencies with vulnerabilities
     implementation "org.yaml:snakeyaml:1.33"

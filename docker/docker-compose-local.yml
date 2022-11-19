@@ -27,8 +27,8 @@ services:
     networks:
       - job-alerts-net
 
-  telegram:
-    container_name: job-alerts-telegram
+  wiremock:
+    container_name: job-alerts-wiremock
     image: wiremock/wiremock:2.34.0
     ports:
       - "18080:8080"
@@ -44,7 +44,7 @@ services:
     depends_on:
       - db
       - mail
-      - telegram
+      - wiremock
     networks:
       - job-alerts-net
 
