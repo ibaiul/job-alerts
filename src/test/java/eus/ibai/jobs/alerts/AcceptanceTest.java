@@ -283,7 +283,7 @@ public class AcceptanceTest {
     }
 
     protected void verifyActiveJobsMetricRecorded(String siteName, int activeJobs) {
-        await().atMost(5,TimeUnit.SECONDS).untilAsserted(() -> {
+        await().atMost(5,TimeUnit.SECONDS).ignoreExceptions().untilAsserted(() -> {
             Gauge activeJobsGauge = meterRegistry.find("jobs.active").tag("site_name", siteName).gauge();
             assertThat(activeJobsGauge, notNullValue());
             assertThat(activeJobsGauge.value(), is((double) activeJobs));
