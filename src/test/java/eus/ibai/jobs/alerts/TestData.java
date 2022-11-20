@@ -74,19 +74,27 @@ public class TestData {
             }
             """;
 
+    public static final String NEW_RELIC_SEND_METRICS_SUCCESS_RESPONSE = """
+            {
+              "requestId": "00000000-0000-0000-0000-000000000000"
+            }
+            """;
+
     public static final String JOB_SITE_1_NAME = "JobSite1";
 
-    public static final String JOB_SITE_1_URL_FORMAT = "%s/job-site-1";
+    public static final String JOB_SITE_1_PATH = "/job-site-1";
 
-    public static final String NON_EXISTENT_JOB_SITE_URL_FORMAT = "%s/non-existent-job-site";
+    public static final String JOB_SITE_1_URL_FORMAT = "%s" + JOB_SITE_1_PATH;
+
+    public static final String NON_EXISTENT_JOB_SITE_PATH = "/non-existent-job-site";
+
+    public static final String NON_EXISTENT_JOB_SITE_URL_FORMAT = "%s" + NON_EXISTENT_JOB_SITE_PATH;
 
     public static final String JOB_1_TITLE = "Job 1";
 
     public static final String JOB_1_URL_FORMAT = "%s/job1/details";
 
     public static final String JOB_SITE_2_NAME = "JobSite2";
-
-    public static final String JOB_SITE_2_URL_FORMAT = "%s/not-found";
 
     public static final String JOB_2_TITLE = "Job 2";
 

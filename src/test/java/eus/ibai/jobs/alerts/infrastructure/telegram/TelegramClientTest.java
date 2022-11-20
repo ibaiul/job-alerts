@@ -25,6 +25,7 @@ class TelegramClientTest extends AcceptanceTest {
                 .verifyComplete();
 
         verifyTelegramMessageSent(VALID_CHAT_ID, expectedMessage);
+        verifyTelegramMessageSentMetricRecorded(200, 1L);
     }
 
     @Test
@@ -37,5 +38,6 @@ class TelegramClientTest extends AcceptanceTest {
                 .verifyError(NotificationException.class);
 
         verifyTelegramMessageSent(VALID_CHAT_ID, expectedMessage);
+        verifyTelegramMessageSentMetricRecorded(400, 1L);
     }
 }

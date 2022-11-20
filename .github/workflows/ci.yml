@@ -64,7 +64,6 @@ jobs:
           command: ${{ env.SNYK_ACTION }}
 
       - name: Build Docker image
-        if: github.event_name == 'pull_request' || github.ref == 'refs/heads/master'
         uses: docker/build-push-action@v3
         env:
           IMAGE_NAME: ${{ secrets.DOCKER_HUB_IMAGE }}
