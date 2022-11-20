@@ -7,6 +7,7 @@ import eus.ibai.jobs.alerts.infrastructure.email.GreenMailContainer;
 import eus.ibai.jobs.alerts.infrastructure.email.TestMimeMessage;
 import eus.ibai.jobs.alerts.infrastructure.repository.JobEntityRepository;
 import eus.ibai.jobs.alerts.infrastructure.repository.JobSiteEntityRepository;
+import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
 import lombok.extern.slf4j.Slf4j;
@@ -280,6 +281,15 @@ public class AcceptanceTest {
             assertThat(timer.count(), is(times));
         });
     }
+
+    protected void verifyActiveJobsMetricRecorded(String siteName, int activeJobs) {
+        await().atMost(5,TimeUnit.SECONDS).untilAsserted(() -> {
+            Gauge activeJobsGauge = meterRegistry.find("jobs.active").tag("site_name", siteName).gauge();
+            assertThat(activeJobsGauge, notNullValue());
+            assertThat(activeJobsGauge.value(), is((double) activeJobs));
+        });
+    }
+
 
     protected String wiremockBaseUrl() {
         return wiremock.baseUrl();

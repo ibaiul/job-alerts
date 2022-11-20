@@ -1,6 +1,5 @@
 package eus.ibai.jobs.alerts.infrastructure.repository;
 
-import com.newrelic.telemetry.micrometer.NewRelicRegistry;
 import eus.ibai.jobs.alerts.domain.Job;
 import eus.ibai.jobs.alerts.domain.JobSiteSummary;
 import eus.ibai.jobs.alerts.domain.repository.JobRepository;
@@ -14,8 +13,6 @@ import reactor.core.publisher.Mono;
 
 import java.util.Objects;
 
-import static eus.ibai.jobs.alerts.infrastructure.metrics.MetricUtils.recordActiveJobs;
-
 @Slf4j
 @Component
 @AllArgsConstructor
@@ -24,8 +21,6 @@ public class JobRepositoryImpl implements JobRepository {
     private final JobSiteEntityRepository jobSiteEntityRepository;
 
     private final JobEntityRepository jobEntityRepository;
-
-    private final NewRelicRegistry meterRegistry;
 
     @Override
     public Mono<Void> sync(JobSiteSummary siteSummary) {
@@ -36,10 +31,7 @@ public class JobRepositoryImpl implements JobRepository {
                 .thenMany(Flux.fromIterable(siteSummary.jobs()))
                 .flatMap(job -> syncJob(job, jobSiteEntitySource))
                 .then()
-                .doOnSuccess(result -> {
-                    log.info("Synchronized jobs from site {}", siteName);
-                    recordActiveJobs(meterRegistry, siteName, siteSummary.jobs().size());
-                });
+                .doOnSuccess(result -> log.info("Synchronized jobs from site {}", siteName));
     }
 
     @Override

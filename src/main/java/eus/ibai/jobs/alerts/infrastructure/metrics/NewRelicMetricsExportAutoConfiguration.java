@@ -20,10 +20,7 @@ import java.net.UnknownHostException;
 import java.time.Duration;
 
 @Configuration
-@AutoConfigureBefore({
-        CompositeMeterRegistryAutoConfiguration.class,
-        SimpleMetricsExportAutoConfiguration.class
-})
+@AutoConfigureBefore({CompositeMeterRegistryAutoConfiguration.class, SimpleMetricsExportAutoConfiguration.class})
 @AutoConfigureAfter(MetricsAutoConfiguration.class)
 @ConditionalOnClass(NewRelicRegistry.class)
 public class NewRelicMetricsExportAutoConfiguration {

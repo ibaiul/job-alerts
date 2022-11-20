@@ -32,7 +32,7 @@ class MetricUtilsTest {
 
     @ParameterizedTest
     @MethodSource("provideSiteNames")
-    void should_remove_whitespaces_when_transforming_site_name_into_tag(String siteName, String expectedTagName) {
+    void should_replace_whitespaces_when_transforming_site_name_into_tag(String siteName, String expectedTagName) {
         MeterRegistry meterRegistry = new SimpleMeterRegistry();
 
         recordActiveJobs(meterRegistry, siteName, 1);

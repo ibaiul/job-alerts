@@ -53,6 +53,13 @@ class MainSchedulerTest extends AcceptanceTest {
     }
 
     @Test
+    void should_record_active_jobs_when_checking_site_periodically() {
+        mainScheduler.runPeriodicSchedule();
+
+        verifyActiveJobsMetricRecorded(JOB_SITE_1_NAME, 2);
+    }
+
+    @Test
     void should_not_notify_when_checking_site_periodically_and_site_has_not_changed() {
         Job job1 = new Job(JOB_1_TITLE, format(JOB_1_URL_FORMAT, wiremockBaseUrl()));
         Job job2 = new Job(JOB_2_TITLE, format(JOB_2_URL_FORMAT, wiremockBaseUrl()));
