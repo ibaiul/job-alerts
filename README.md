@@ -36,3 +36,13 @@ a more specialized tool such as Selenium with a headless browser can be used.
 At the moment Telegram (Bot API) and Email (SMTP) alerts are supported.
 
 <img src="img/telegram-notification.jpeg" width="25%">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="img/email-notification.jpeg" width="25%">
+
+### Monitoring
+
+NewRelic is integrated through the Java Agent, Micrometer and the Infrastructure Agent as a POC to get familiarized with the tool.
+
+It provides visibility of application, system and business metrics as well as a centralised place for the logs.
+
+Alerts are also set to notify about certain scenarios.
+
+<img src="img/new-relic-dashboard.jpeg" width="75%">
