@@ -187,7 +187,7 @@ public class AcceptanceTest {
 
     private static void stubNewRelicSendMetricResponse(int statusCode, String response) {
         wiremock.stubFor(post(urlEqualTo(NEW_RELIC_METRIC_INGEST_ENDPOINT))
-                .withHeader(HttpHeaders.CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
+                .withHeader(HttpHeaders.CONTENT_TYPE, equalTo("application/json; charset=UTF-8"))
                 .withRequestBody(matching(".+"))
                 .willReturn(aResponse()
                         .withStatus(statusCode)
