@@ -45,4 +45,4 @@ It provides visibility of application, system and business metrics as well as a 
 
 Alerts are also set to notify about certain scenarios.
 
-<img src="img/new-relic-dashboard.jpeg" width="75%">
+<img src="img/new-relic-dashboard.jpeg" width="100%">
