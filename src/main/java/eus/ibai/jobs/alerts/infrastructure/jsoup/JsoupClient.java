@@ -1,9 +1,13 @@
 package eus.ibai.jobs.alerts.infrastructure.jsoup;
 
 import eus.ibai.jobs.alerts.domain.parse.ParsingException;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.springframework.boot.actuate.metrics.AutoTimer;
+import org.springframework.boot.actuate.metrics.web.reactive.client.DefaultWebClientExchangeTagsProvider;
+import org.springframework.boot.actuate.metrics.web.reactive.client.MetricsWebClientFilterFunction;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Component;
@@ -21,15 +25,20 @@ public class JsoupClient {
 
     private static final int BUFFER_SIZE = 5 * 1024 * 1024;
 
-    private final WebClient webClient = WebClient.builder()
-            .defaultHeader(HttpHeaders.USER_AGENT, USER_AGENT)
-            .clientConnector(new ReactorClientHttpConnector(HttpClient.create()
-                    .followRedirect(true)
-                    .compress(true)))
-            .exchangeStrategies(ExchangeStrategies.builder()
-                    .codecs(codecs -> codecs.defaultCodecs().maxInMemorySize(BUFFER_SIZE))
-                    .build())
-            .build();
+    private final WebClient webClient;
+
+    public JsoupClient(MeterRegistry meterRegistry) {
+        webClient = WebClient.builder()
+                .defaultHeader(HttpHeaders.USER_AGENT, USER_AGENT)
+                .clientConnector(new ReactorClientHttpConnector(HttpClient.create()
+                        .followRedirect(true)
+                        .compress(true)))
+                .filter(new MetricsWebClientFilterFunction(meterRegistry, new DefaultWebClientExchangeTagsProvider(), "http.out.site", AutoTimer.ENABLED))
+                .exchangeStrategies(ExchangeStrategies.builder()
+                        .codecs(codecs -> codecs.defaultCodecs().maxInMemorySize(BUFFER_SIZE))
+                        .build())
+                .build();
+    }
 
     public Mono<Document> parse(String siteUrl) {
         log.trace("Retrieving DOM from {}", siteUrl);

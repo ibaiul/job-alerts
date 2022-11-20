@@ -12,7 +12,6 @@ import java.util.stream.Stream;
 
 import static eus.ibai.jobs.alerts.TestData.JOB_SITE_1_NAME;
 import static eus.ibai.jobs.alerts.infrastructure.metrics.MetricUtils.recordActiveJobs;
-import static eus.ibai.jobs.alerts.infrastructure.metrics.MetricUtils.siteNameToTag;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
@@ -34,9 +33,12 @@ class MetricUtilsTest {
     @ParameterizedTest
     @MethodSource("provideSiteNames")
     void should_remove_whitespaces_when_transforming_site_name_into_tag(String siteName, String expectedTagName) {
-        String actualTagName = siteNameToTag(siteName);
+        MeterRegistry meterRegistry = new SimpleMeterRegistry();
 
-        assertThat(actualTagName, equalTo(expectedTagName));
+        recordActiveJobs(meterRegistry, siteName, 1);
+
+        Gauge activeJobsGauge = meterRegistry.find("jobs.active").tag("site_name", expectedTagName).gauge();
+        assertThat(activeJobsGauge, notNullValue());
     }
 
     private static Stream<Arguments> provideSiteNames() {

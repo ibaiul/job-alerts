@@ -8,6 +8,7 @@ import eus.ibai.jobs.alerts.infrastructure.email.TestMimeMessage;
 import eus.ibai.jobs.alerts.infrastructure.repository.JobEntityRepository;
 import eus.ibai.jobs.alerts.infrastructure.repository.JobSiteEntityRepository;
 import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -22,11 +23,16 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import reactor.test.StepVerifier;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static eus.ibai.jobs.alerts.TestData.*;
 import static java.lang.String.format;
+import static org.awaitility.Awaitility.await;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Slf4j
@@ -131,7 +137,7 @@ public class AcceptanceTest {
         registry.add("sites[0].notifications[1].type", () -> "email");
         registry.add("sites[0].notifications[1].recipients[0]", () -> "job-alert-recipient@localhost");
         registry.add("sites[1].name", () -> JOB_SITE_2_NAME);
-        registry.add("sites[1].url", () -> format(JOB_SITE_2_URL_FORMAT, wiremock.baseUrl()));
+        registry.add("sites[1].url", () -> format(NON_EXISTENT_JOB_SITE_URL_FORMAT, wiremock.baseUrl()));
         registry.add("sites[1].strategy.type", () -> "basicHtml");
         registry.add("sites[1].strategy.steps", () -> "a");
     }
@@ -251,6 +257,28 @@ public class AcceptanceTest {
                 .withRequestBody(matchingJsonPath("$[0].common.attributes", containing("micrometer-registry-newrelic")))
                 .withRequestBody(matchingJsonPath("$[0].metrics", matching(".+")))
         );
+    }
+
+    protected void verifyTelegramMessageSentMetricRecorded(int status, long times) {
+        await().atMost(5,TimeUnit.SECONDS).untilAsserted(() -> {
+            Timer timer = meterRegistry.find("http.out.telegram")
+                    .tag("uri", "/sendMessage")
+                    .tag("status", Integer.toString(status))
+                    .timer();
+            assertThat(timer, notNullValue());
+            assertThat(timer.count(), is(times));
+        });
+    }
+
+    protected void verifyJobSiteRequestMetricRecorded(String path, int status, long times) {
+        await().atMost(5,TimeUnit.SECONDS).untilAsserted(() -> {
+            Timer timer = meterRegistry.find("http.out.site")
+                    .tag("uri", path)
+                    .tag("status", Integer.toString(status))
+                    .timer();
+            assertThat(timer, notNullValue());
+            assertThat(timer.count(), is(times));
+        });
     }
 
     protected String wiremockBaseUrl() {

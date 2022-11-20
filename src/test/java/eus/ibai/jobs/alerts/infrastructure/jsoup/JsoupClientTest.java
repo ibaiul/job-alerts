@@ -7,8 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.reactive.function.client.WebClientRequestException;
 import reactor.test.StepVerifier;
 
-import static eus.ibai.jobs.alerts.TestData.JOB_SITE_1_URL_FORMAT;
-import static eus.ibai.jobs.alerts.TestData.NON_EXISTENT_JOB_SITE_URL_FORMAT;
+import static eus.ibai.jobs.alerts.TestData.*;
 import static java.lang.String.format;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
@@ -24,6 +23,7 @@ class JsoupClientTest extends AcceptanceTest {
         StepVerifier.create(jsoupClient.parse(format(JOB_SITE_1_URL_FORMAT, wiremockBaseUrl())))
                 .expectNextMatches(document -> !document.select("ul.menu_pag").isEmpty())
                 .verifyComplete();
+        verifyJobSiteRequestMetricRecorded(JOB_SITE_1_PATH, 200, 1L);
     }
 
     @Test
@@ -34,6 +34,7 @@ class JsoupClientTest extends AcceptanceTest {
                     assertThat(error, instanceOf(ParsingException.class));
                     assertThat(error.getCause(), nullValue());
                 });
+        verifyJobSiteRequestMetricRecorded(NON_EXISTENT_JOB_SITE_PATH, 404, 1L);
     }
 
     @Test
