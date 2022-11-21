@@ -42,8 +42,7 @@ jobs:
 
       - name: Archive Test Report
         uses: actions/upload-artifact@v3
-#        if: failure()
-        if: always()
+        if: failure()
         with:
           name: junit-test-results
           path: |
