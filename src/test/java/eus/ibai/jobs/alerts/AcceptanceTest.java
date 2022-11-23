@@ -7,7 +7,6 @@ import eus.ibai.jobs.alerts.infrastructure.email.GreenMailContainer;
 import eus.ibai.jobs.alerts.infrastructure.email.TestMimeMessage;
 import eus.ibai.jobs.alerts.infrastructure.repository.JobEntityRepository;
 import eus.ibai.jobs.alerts.infrastructure.repository.JobSiteEntityRepository;
-import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static eus.ibai.jobs.alerts.TestData.*;
+import static eus.ibai.jobs.alerts.infrastructure.metrics.MetricUtils.clearGaugeReferences;
 import static java.lang.String.format;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -94,7 +94,7 @@ public class AcceptanceTest {
     @BeforeEach
     void beforeEach() {
         log.debug("Before each");
-        stubJobSite1Ok();
+        stubJobSite1WithTwoJobsOk();
         stubTelegramGetUpdatesSuccessResponse();
         stubTelegramSendMessageSuccessResponse(VALID_CHAT_ID);
         stubNewRelicSendMetricResponse(202, NEW_RELIC_SEND_METRICS_SUCCESS_RESPONSE);
@@ -105,10 +105,12 @@ public class AcceptanceTest {
         log.debug("After each");
         wiremock.resetAll();
         meterRegistry.clear();
+        clearGaugeReferences();
         StepVerifier.create(greenMailClient.purgeEmailFromAllMailboxes())
                 .verifyComplete();
         StepVerifier.create(jobEntityRepository.deleteAll())
                 .verifyComplete();
+        await().atMost(5, TimeUnit.SECONDS).ignoreExceptions().until(() -> jobEntityRepository.findAll().count().block() == 0);
         StepVerifier.create(jobSiteEntityRepository.deleteAll())
                 .verifyComplete();
         jobSiteRegistration.registerJobSites();
@@ -195,8 +197,12 @@ public class AcceptanceTest {
                         .withBody(response)));
     }
 
-    protected void stubJobSite1Ok() {
-        stubJobSite1(200, jobSite1Response(wiremockBaseUrl()));
+    protected void stubJobSite1WithTwoJobsOk() {
+        stubJobSite1(200, jobSiteWithTwoJobsResponse(wiremockBaseUrl()));
+    }
+
+    protected void stubJobSite1WithOneJobOk() {
+        stubJobSite1(200, jobSiteWithOneJobResponse(wiremockBaseUrl()));
     }
 
     private static void stubJobSite1(int statusCode, String response) {
@@ -281,15 +287,6 @@ public class AcceptanceTest {
             assertThat(timer.count(), is(times));
         });
     }
-
-    protected void verifyActiveJobsMetricRecorded(String siteName, int activeJobs) {
-        await().atMost(5,TimeUnit.SECONDS).ignoreExceptions().untilAsserted(() -> {
-            Gauge activeJobsGauge = meterRegistry.find("jobs.active").tag("site_name", siteName).gauge();
-            assertThat(activeJobsGauge, notNullValue());
-            assertThat(activeJobsGauge.value(), is((double) activeJobs));
-        });
-    }
-
 
     protected String wiremockBaseUrl() {
         return wiremock.baseUrl();

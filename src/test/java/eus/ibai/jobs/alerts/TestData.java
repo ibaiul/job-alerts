@@ -102,7 +102,17 @@ public class TestData {
 
     private static final String JOB_2_RELATIVE_URL = "/job2/details";
 
-    public static String jobSite1Response(String wiremockBaseUrl) {
+    public static String jobSiteWithOneJobResponse(String wiremockBaseUrl) {
+        return format("""
+                <html><body>
+                    <ul class="menu_pag">
+                        <li><a href="%s">%s</a></li>
+                    </ul>
+                </body></html>
+                """, format(JOB_1_URL_FORMAT, wiremockBaseUrl), JOB_1_TITLE);
+    }
+
+    public static String jobSiteWithTwoJobsResponse(String wiremockBaseUrl) {
         return format("""
                 <html><body>
                     <ul class="menu_pag">
