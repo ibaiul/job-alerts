@@ -40,6 +40,22 @@ jobs:
       - name: Test
         run: ./gradlew test
 
+      - name: Archive Test Report
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: junit-test-results
+          path: |
+            **/build/test-results/test/TEST-*.xml
+            **/reports/tests/
+
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          junit_files: "build/test-results/test/**/*.xml"
+          comment_mode: off
+
       - name: Sonar
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
