@@ -15,6 +15,8 @@ public final class MetricUtils {
 
     private static final Map<String, AtomicInteger> activeJobsMap = new ConcurrentHashMap<>();
 
+    private static final Map<String, AtomicInteger> componentHealthMap = new ConcurrentHashMap<>();
+
     private MetricUtils() {
     }
 
@@ -28,12 +30,20 @@ public final class MetricUtils {
         }
     }
 
-    public static void clearGaugeReferences() {
-        activeJobsMap.keySet().clear();
+    public static void recordComponentHealth(MeterRegistry meterRegistry, String componentName, Status status) {
+        int statusValue = mapHealthStatusToMetricValue(status);
+        if (activeJobsMap.containsKey(componentName)) {
+            activeJobsMap.get(componentName).set(statusValue);
+        } else {
+            AtomicInteger currentHealthValue = new AtomicInteger(statusValue);
+            activeJobsMap.put(componentName, currentHealthValue);
+            meterRegistry.gauge("health.component", List.of(Tag.of("component", componentName)), currentHealthValue, AtomicInteger::get);
+        }
     }
 
-    public static void recordHealthcheck(MeterRegistry meterRegistry, String componentName, Status status) {
-        meterRegistry.gauge("health.component", List.of(Tag.of("component", componentName), Tag.of("status", status.getCode())), mapHealthStatusToMetricValue(status));
+    public static void clearGaugeReferences() {
+        activeJobsMap.keySet().clear();
+        componentHealthMap.keySet().clear();
     }
 
     private static String siteNameToTag(String siteName) {

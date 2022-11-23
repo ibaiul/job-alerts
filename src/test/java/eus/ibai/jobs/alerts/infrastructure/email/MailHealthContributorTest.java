@@ -9,7 +9,8 @@ import org.springframework.boot.actuate.health.Health;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import static eus.ibai.jobs.alerts.infrastructure.metrics.MetricTestUtils.verifyComponentHealthMetricRecorded;
+import static eus.ibai.jobs.alerts.infrastructure.metrics.MetricTestUtils.verifyComponentHealthRecorded;
+import static eus.ibai.jobs.alerts.infrastructure.metrics.MetricUtils.clearGaugeReferences;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -23,6 +24,7 @@ class MailHealthContributorTest {
 
     @BeforeEach
     void beforeEach() {
+        clearGaugeReferences();
         emailClient = mock(EmailClient.class);
         meterRegistry = new SimpleMeterRegistry();
         healthContributor = new MailHealthContributor(emailClient, meterRegistry);
@@ -36,7 +38,7 @@ class MailHealthContributorTest {
         StepVerifier.create(healthContributor.doHealthCheck())
                 .expectNext(expectedHealth)
                 .verifyComplete();
-        verifyComponentHealthMetricRecorded(meterRegistry, healthContributor.getComponentName(), expectedHealth.getStatus());
+        verifyComponentHealthRecorded(meterRegistry, healthContributor.getComponentName(), expectedHealth.getStatus());
     }
 
     @Test
@@ -47,6 +49,6 @@ class MailHealthContributorTest {
         StepVerifier.create(healthContributor.doHealthCheck())
                 .expectNext(expectedHealth)
                 .verifyComplete();
-        verifyComponentHealthMetricRecorded(meterRegistry, healthContributor.getComponentName(), expectedHealth.getStatus());
+        verifyComponentHealthRecorded(meterRegistry, healthContributor.getComponentName(), expectedHealth.getStatus());
     }
 }

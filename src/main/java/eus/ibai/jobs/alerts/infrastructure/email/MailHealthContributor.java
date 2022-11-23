@@ -8,7 +8,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
-import static eus.ibai.jobs.alerts.infrastructure.metrics.MetricUtils.recordHealthcheck;
+import static eus.ibai.jobs.alerts.infrastructure.metrics.MetricUtils.recordComponentHealth;
 
 @Component
 @AllArgsConstructor
@@ -26,7 +26,7 @@ public class MailHealthContributor implements ComponentHealthContributor {
         return emailClient.checkHealth()
                 .thenReturn(Health.up().build())
                 .onErrorReturn(Health.down().build())
-                .doOnNext(health -> recordHealthcheck(meterRegistry, COMPONENT_NAME, health.getStatus()));
+                .doOnNext(health -> recordComponentHealth(meterRegistry, COMPONENT_NAME, health.getStatus()));
     }
 
     @Override

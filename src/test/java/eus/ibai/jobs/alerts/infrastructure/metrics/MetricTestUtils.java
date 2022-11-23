@@ -2,7 +2,6 @@ package eus.ibai.jobs.alerts.infrastructure.metrics;
 
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
-import org.hamcrest.CoreMatchers;
 import org.springframework.boot.actuate.health.Status;
 
 import java.util.concurrent.TimeUnit;
@@ -25,12 +24,13 @@ public class MetricTestUtils {
         });
     }
 
-    public static void verifyComponentHealthMetricRecorded(MeterRegistry meterRegistry, String componentName, Status status) {
-        Gauge componentHealthGauge = meterRegistry.find("health.component")
-                .tag("component", componentName)
-                .tag("status", status.getCode())
-                .gauge();
-        assertThat(componentHealthGauge, CoreMatchers.notNullValue());
-        assertThat(componentHealthGauge.value(), equalTo(status == UP ? 1.0d : 0.0d));
+    public static void verifyComponentHealthRecorded(MeterRegistry meterRegistry, String componentName, Status status) {
+        await().atMost(7, TimeUnit.SECONDS).ignoreExceptions().untilAsserted(() -> {
+            Gauge componentHealthGauge = meterRegistry.find("health.component")
+                    .tag("component", componentName)
+                    .gauge();
+            assertThat(componentHealthGauge, notNullValue());
+            assertThat(componentHealthGauge.value(), equalTo(status == UP ? 1.0d : 0.0d));
+        });
     }
 }
