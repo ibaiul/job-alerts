@@ -5,6 +5,7 @@ import eus.ibai.jobs.alerts.domain.Job;
 import eus.ibai.jobs.alerts.domain.JobSiteSummary;
 import eus.ibai.jobs.alerts.domain.alert.JobSiteAlerterRegistry;
 import eus.ibai.jobs.alerts.domain.repository.JobRepository;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import reactor.test.StepVerifier;
 import java.util.List;
 
 import static eus.ibai.jobs.alerts.TestData.*;
+import static eus.ibai.jobs.alerts.infrastructure.metrics.MetricTestUtils.verifyActiveJobsRecorded;
 import static java.lang.String.format;
 import static java.util.Comparator.comparing;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -29,6 +31,9 @@ class MainSchedulerTest extends AcceptanceTest {
 
     @Autowired
     private JobRepository jobRepository;
+
+    @Autowired
+    private MeterRegistry meterRegistry;
 
     @Test
     void should_persist_jobs_when_checking_site_periodically() {
@@ -56,7 +61,18 @@ class MainSchedulerTest extends AcceptanceTest {
     void should_record_active_jobs_when_checking_site_periodically() {
         mainScheduler.runPeriodicSchedule();
 
-        verifyActiveJobsMetricRecorded(JOB_SITE_1_NAME, 2);
+        verifyActiveJobsRecorded(meterRegistry, JOB_SITE_1_NAME, 2);
+    }
+
+    @Test
+    void should_update_recorded_active_jobs_when_checking_site_periodically_and_site_has_changed() {
+        mainScheduler.runPeriodicSchedule();
+        verifyActiveJobsRecorded(meterRegistry, JOB_SITE_1_NAME, 2);
+        stubJobSite1WithOneJobOk();
+
+        mainScheduler.runPeriodicSchedule();
+
+        verifyActiveJobsRecorded(meterRegistry, JOB_SITE_1_NAME, 1);
     }
 
     @Test
