@@ -1,34 +1,25 @@
 package eus.ibai.jobs.alerts.infrastructure.email;
 
 import eus.ibai.jobs.alerts.domain.notification.NotificationException;
-import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.actuate.health.Health;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import static eus.ibai.jobs.alerts.infrastructure.metrics.MetricTestUtils.verifyComponentHealthRecorded;
-import static eus.ibai.jobs.alerts.infrastructure.metrics.MetricUtils.clearGaugeReferences;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class MailHealthContributorTest {
 
+    @Mock
     private EmailClient emailClient;
 
-    private MeterRegistry meterRegistry;
-
+    @InjectMocks
     private MailHealthContributor healthContributor;
-
-    @BeforeEach
-    void beforeEach() {
-        clearGaugeReferences();
-        emailClient = mock(EmailClient.class);
-        meterRegistry = new SimpleMeterRegistry();
-        healthContributor = new MailHealthContributor(emailClient, meterRegistry);
-    }
 
     @Test
     void should_return_healthy_when_mail_server_available() {
@@ -38,7 +29,6 @@ class MailHealthContributorTest {
         StepVerifier.create(healthContributor.doHealthCheck())
                 .expectNext(expectedHealth)
                 .verifyComplete();
-        verifyComponentHealthRecorded(meterRegistry, healthContributor.getComponentName(), expectedHealth.getStatus());
     }
 
     @Test
@@ -49,6 +39,5 @@ class MailHealthContributorTest {
         StepVerifier.create(healthContributor.doHealthCheck())
                 .expectNext(expectedHealth)
                 .verifyComplete();
-        verifyComponentHealthRecorded(meterRegistry, healthContributor.getComponentName(), expectedHealth.getStatus());
     }
 }

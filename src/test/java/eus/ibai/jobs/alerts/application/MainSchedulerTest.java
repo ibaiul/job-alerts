@@ -5,7 +5,6 @@ import eus.ibai.jobs.alerts.domain.Job;
 import eus.ibai.jobs.alerts.domain.JobSiteSummary;
 import eus.ibai.jobs.alerts.domain.alert.JobSiteAlerterRegistry;
 import eus.ibai.jobs.alerts.domain.repository.JobRepository;
-import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,9 +30,6 @@ class MainSchedulerTest extends AcceptanceTest {
 
     @Autowired
     private JobRepository jobRepository;
-
-    @Autowired
-    private MeterRegistry meterRegistry;
 
     @Test
     void should_persist_jobs_when_checking_site_periodically() {

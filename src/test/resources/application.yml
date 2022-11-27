@@ -24,7 +24,7 @@ management:
     probes:
       enabled: true
     r2dbc:
-      enabled: true
+      enabled: false
     mail:
       enabled: true
     telegram:

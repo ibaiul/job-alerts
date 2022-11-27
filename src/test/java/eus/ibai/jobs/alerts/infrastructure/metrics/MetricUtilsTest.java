@@ -7,16 +7,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.springframework.boot.actuate.health.Status;
 
 import java.util.stream.Stream;
 
 import static eus.ibai.jobs.alerts.TestData.JOB_SITE_1_NAME;
 import static eus.ibai.jobs.alerts.infrastructure.metrics.MetricTestUtils.verifyActiveJobsRecorded;
-import static eus.ibai.jobs.alerts.infrastructure.metrics.MetricTestUtils.verifyComponentHealthRecorded;
-import static eus.ibai.jobs.alerts.infrastructure.metrics.MetricUtils.*;
-import static org.springframework.boot.actuate.health.Status.DOWN;
-import static org.springframework.boot.actuate.health.Status.UP;
+import static eus.ibai.jobs.alerts.infrastructure.metrics.MetricUtils.clearGaugeReferences;
+import static eus.ibai.jobs.alerts.infrastructure.metrics.MetricUtils.recordActiveJobs;
 
 class MetricUtilsTest {
 
@@ -46,28 +43,6 @@ class MetricUtilsTest {
         recordActiveJobs(meterRegistry, JOB_SITE_1_NAME, expectedActiveJobs);
 
         verifyActiveJobsRecorded(meterRegistry, JOB_SITE_1_NAME, expectedActiveJobs);
-    }
-
-    @Test
-    void should_record_component_health() {
-        String componentName = "componentName";
-        Status expectedStatus = UP;
-
-        recordComponentHealth(meterRegistry, componentName, expectedStatus);
-
-        verifyComponentHealthRecorded(meterRegistry, componentName, expectedStatus);
-    }
-
-    @Test
-    void should_update_component_health_record_when_recording_component_health_again() {
-        String componentName = "componentName";
-        recordComponentHealth(meterRegistry, componentName, UP);
-        verifyComponentHealthRecorded(meterRegistry, componentName, UP);
-        Status expectedStatus = DOWN;
-
-        recordComponentHealth(meterRegistry, componentName, expectedStatus);
-
-        verifyComponentHealthRecorded(meterRegistry, componentName, expectedStatus);
     }
 
     @ParameterizedTest

@@ -83,7 +83,7 @@ public class AcceptanceTest {
     private JobSiteRegistration jobSiteRegistration;
 
     @Autowired
-    private MeterRegistry meterRegistry;
+    protected MeterRegistry meterRegistry;
 
     @BeforeAll
     static void beforeAll() {

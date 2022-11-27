@@ -3,49 +3,37 @@ package eus.ibai.jobs.alerts.infrastructure.health;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.actuate.health.Health;
-import reactor.core.publisher.Mono;
 
-import java.util.List;
-
+import static eus.ibai.jobs.alerts.TestData.COMPONENT_NAME;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class HealthCacheTest {
-
-    private static final String COMPONENT_NAME = "componentName";
-
-    @Mock
-    private ComponentHealthContributor healthContributor;
 
     private HealthCache healthCache;
 
     @BeforeEach
     void beforeEach() {
-        when(healthContributor.getComponentName()).thenReturn(COMPONENT_NAME);
-        healthCache = new HealthCache(List.of(healthContributor));
+        healthCache = new HealthCache();
     }
 
     @Test
-    void should_return_all_components_healthy_when_starting() {
+    void should_return_health_of_component() {
         Health expectedHealth = Health.up().build();
-        Health componentHealth = healthCache.getHealth(COMPONENT_NAME);
 
-        assertThat(componentHealth, equalTo(expectedHealth));
+        healthCache.setHealth(COMPONENT_NAME, expectedHealth);
+
+        Health actualHealth = healthCache.getHealth(COMPONENT_NAME);
+        assertThat(actualHealth, equalTo(expectedHealth));
     }
 
     @Test
-    void should_update_internal_cache_when_checking_health_periodically() {
-        Health expectedHealth = Health.down().build();
-        when(healthContributor.doHealthCheck()).thenReturn(Mono.just(expectedHealth));
+    void should_return_unknown_when_getting_health_of_unregistered_component() {
+        Health health = healthCache.getHealth("notRegisteredComponent");
 
-        healthCache.checkHealth();
-
-        Health componentHealth = healthCache.getHealth(COMPONENT_NAME);
-        assertThat(componentHealth, equalTo(expectedHealth));
+        assertThat(health, equalTo(Health.unknown().build()));
     }
 }

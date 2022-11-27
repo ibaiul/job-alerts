@@ -6,6 +6,7 @@ import org.springframework.boot.actuate.health.Status;
 
 import java.util.concurrent.TimeUnit;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -25,8 +26,8 @@ public class MetricTestUtils {
     }
 
     public static void verifyComponentHealthRecorded(MeterRegistry meterRegistry, String componentName, Status status) {
-        await().atMost(7, TimeUnit.SECONDS).ignoreExceptions().untilAsserted(() -> {
-            Gauge componentHealthGauge = meterRegistry.find("health.component")
+        await().atMost(7, SECONDS).ignoreExceptions().untilAsserted(() -> {
+            Gauge componentHealthGauge = meterRegistry.find("health")
                     .tag("component", componentName)
                     .gauge();
             assertThat(componentHealthGauge, notNullValue());

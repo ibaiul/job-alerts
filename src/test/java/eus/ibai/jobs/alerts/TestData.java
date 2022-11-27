@@ -4,6 +4,8 @@ import static java.lang.String.format;
 
 public class TestData {
 
+    public static final String COMPONENT_NAME = "componentName";
+
     public static final String VALID_CHAT_ID = "chatId1";
 
     public static final String TELEGRAM_GET_UPDATES_OK_RESPONSE = """

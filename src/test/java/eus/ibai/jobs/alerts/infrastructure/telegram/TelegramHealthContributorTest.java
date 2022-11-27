@@ -1,34 +1,25 @@
 package eus.ibai.jobs.alerts.infrastructure.telegram;
 
 import eus.ibai.jobs.alerts.domain.notification.NotificationException;
-import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.actuate.health.Health;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import static eus.ibai.jobs.alerts.infrastructure.metrics.MetricTestUtils.verifyComponentHealthRecorded;
-import static eus.ibai.jobs.alerts.infrastructure.metrics.MetricUtils.clearGaugeReferences;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class TelegramHealthContributorTest {
 
+    @Mock
     private TelegramClient telegramClient;
 
-    private MeterRegistry meterRegistry;
-
+    @InjectMocks
     private TelegramHealthContributor healthContributor;
-
-    @BeforeEach
-    void beforeEach() {
-        clearGaugeReferences();
-        telegramClient = mock(TelegramClient.class);
-        meterRegistry = new SimpleMeterRegistry();
-        healthContributor = new TelegramHealthContributor(telegramClient, meterRegistry);
-    }
 
     @Test
     void should_return_healthy_when_telegram_available() {
@@ -38,7 +29,6 @@ class TelegramHealthContributorTest {
         StepVerifier.create(healthContributor.doHealthCheck())
                 .expectNext(expectedHealth)
                 .verifyComplete();
-        verifyComponentHealthRecorded(meterRegistry, healthContributor.getComponentName(), expectedHealth.getStatus());
     }
 
     @Test
@@ -49,6 +39,5 @@ class TelegramHealthContributorTest {
         StepVerifier.create(healthContributor.doHealthCheck())
                 .expectNext(expectedHealth)
                 .verifyComplete();
-        verifyComponentHealthRecorded(meterRegistry, healthContributor.getComponentName(), expectedHealth.getStatus());
     }
 }
