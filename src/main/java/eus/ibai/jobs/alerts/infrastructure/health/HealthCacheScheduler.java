@@ -3,6 +3,7 @@ package eus.ibai.jobs.alerts.infrastructure.health;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.actuate.health.Health;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -12,6 +13,8 @@ import reactor.util.function.Tuples;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
+
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 @Slf4j
 @Component
@@ -29,9 +32,28 @@ public class HealthCacheScheduler {
     }
 
     @Async
-    @Scheduled(fixedDelayString = "${application.scheduler.health.delay}")
-    public void checkHealth() {
+    @Scheduled(fixedDelayString = "${management.health.r2dbc.interval}", timeUnit = SECONDS)
+    public void checkDatabaseHealth() {
+        checkComponentHealth("database");
+    }
+
+    @Async
+    @Scheduled(fixedDelayString = "${management.health.telegram.interval}", timeUnit = SECONDS)
+    @ConditionalOnProperty(prefix = "telegram", name = "enabled", havingValue = "true")
+    public void checkTelegramHealth() {
+        checkComponentHealth("telegram");
+    }
+
+    @Async
+    @Scheduled(fixedDelayString = "${management.health.mail.interval}", timeUnit = SECONDS)
+    @ConditionalOnProperty(prefix = "mail", name = "enabled", havingValue = "true")
+    public void checkMailHealth() {
+        checkComponentHealth("mail");
+    }
+
+    private void checkComponentHealth(String componentName) {
         Flux.fromIterable(componentHealthContributors)
+                .filter(componentHealthContributor -> componentName.equals(componentHealthContributor.getComponentName()))
                 .doOnNext(healthContributor -> log.trace("Checking health of {} component.", healthContributor.getComponentName()))
                 .flatMap(componentHealthContributor -> componentHealthContributor.doHealthCheck()
                         .map(health -> Tuples.of(componentHealthContributor.getComponentName(), health)))

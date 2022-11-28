@@ -110,7 +110,7 @@ public class AcceptanceTest {
                 .verifyComplete();
         StepVerifier.create(jobEntityRepository.deleteAll())
                 .verifyComplete();
-        await().atMost(5, TimeUnit.SECONDS).ignoreExceptions().until(() -> jobEntityRepository.findAll().count().block() == 0);
+        await().atMost(10, TimeUnit.SECONDS).ignoreExceptions().until(() -> jobEntityRepository.findAll().count().block() == 0);
         StepVerifier.create(jobSiteEntityRepository.deleteAll())
                 .verifyComplete();
         jobSiteRegistration.registerJobSites();

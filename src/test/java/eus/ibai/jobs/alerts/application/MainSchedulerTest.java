@@ -5,7 +5,6 @@ import eus.ibai.jobs.alerts.domain.Job;
 import eus.ibai.jobs.alerts.domain.JobSiteSummary;
 import eus.ibai.jobs.alerts.domain.alert.JobSiteAlerterRegistry;
 import eus.ibai.jobs.alerts.domain.repository.JobRepository;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import reactor.test.StepVerifier;
@@ -19,7 +18,6 @@ import static java.util.Comparator.comparing;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
 
-@Slf4j
 class MainSchedulerTest extends AcceptanceTest {
 
     @Autowired

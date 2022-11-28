@@ -12,7 +12,7 @@ import reactor.core.publisher.Mono;
 @Component
 public class DatabaseHealthContributor implements ComponentHealthContributor {
 
-    public static final String COMPONENT_NAME = "Database";
+    public static final String COMPONENT_NAME = "database";
 
     private final ConnectionFactoryHealthIndicator decoratedIndicator;
 
@@ -28,6 +28,7 @@ public class DatabaseHealthContributor implements ComponentHealthContributor {
     @Override
     public Mono<Health> doHealthCheck() {
         return decoratedIndicator.health()
+                .map(health -> Health.status(health.getStatus()).build())
                 .doOnNext(health -> log.debug("Received database health response: {}", health.getStatus()));
     }
 }
