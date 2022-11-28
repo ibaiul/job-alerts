@@ -20,7 +20,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 @Component
 @EnableAsync
 @AllArgsConstructor
-public class HealthCacheScheduler {
+public class HealthCheckScheduler {
 
     private final HealthCache healthCache;
 

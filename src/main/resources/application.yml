@@ -63,8 +63,6 @@ application:
     periodic:
       cron: '-'
       zone: Europe/Madrid
-    health:
-      delay: 60000
 
 sites:
   - name: 'UCM: Profesor Ayudante Doctor'

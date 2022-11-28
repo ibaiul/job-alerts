@@ -23,7 +23,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class HealthCacheSchedulerTest {
+class HealthCheckSchedulerTest {
 
     @Mock
     private TelegramClient telegramClient;
@@ -36,7 +36,7 @@ class HealthCacheSchedulerTest {
 
     private HealthCache healthCache;
 
-    private HealthCacheScheduler healthCacheScheduler;
+    private HealthCheckScheduler healthCheckScheduler;
 
     @BeforeEach
     void beforeEach() {
@@ -44,7 +44,7 @@ class HealthCacheSchedulerTest {
         TelegramHealthContributor telegramHealthContributor = new TelegramHealthContributor(telegramClient);
         MailHealthContributor mailHealthContributor = new MailHealthContributor(emailClient);
         DatabaseHealthContributor databaseHealthContributor = new DatabaseHealthContributor(connectionFactory);
-        healthCacheScheduler = new HealthCacheScheduler(healthCache, List.of(databaseHealthContributor, telegramHealthContributor, mailHealthContributor));
+        healthCheckScheduler = new HealthCheckScheduler(healthCache, List.of(databaseHealthContributor, telegramHealthContributor, mailHealthContributor));
     }
 
     @ParameterizedTest
@@ -52,7 +52,7 @@ class HealthCacheSchedulerTest {
     void should_return_all_components_healthy_when_application_starts(String componentName) {
         Health expectedHealth = Health.up().build();
 
-        healthCacheScheduler.initCacheOptimistically();
+        healthCheckScheduler.initCacheOptimistically();
 
         Health componentHealth = healthCache.getHealth(componentName);
         assertThat(componentHealth, equalTo(expectedHealth));
@@ -60,10 +60,10 @@ class HealthCacheSchedulerTest {
 
     @Test
     void should_update_health_cache_when_checking_database_health_periodically() {
-        healthCacheScheduler.initCacheOptimistically();
+        healthCheckScheduler.initCacheOptimistically();
         Health expectedHealth = Health.down().build();
 
-        healthCacheScheduler.checkDatabaseHealth();
+        healthCheckScheduler.checkDatabaseHealth();
 
         Health componentHealth = healthCache.getHealth("database");
         assertThat(componentHealth, equalTo(expectedHealth));
@@ -71,10 +71,10 @@ class HealthCacheSchedulerTest {
 
     @Test
     void should_update_health_cache_when_checking_telegram_health_periodically() {
-        healthCacheScheduler.initCacheOptimistically();
+        healthCheckScheduler.initCacheOptimistically();
         when(telegramClient.checkHealth()).thenReturn(Mono.error(new Throwable()));
 
-        healthCacheScheduler.checkTelegramHealth();
+        healthCheckScheduler.checkTelegramHealth();
 
         Health componentHealth = healthCache.getHealth("telegram");
         assertThat(componentHealth, equalTo(Health.down().build()));
@@ -82,10 +82,10 @@ class HealthCacheSchedulerTest {
 
     @Test
     void should_update_health_cache_when_checking_mail_health_periodically() {
-        healthCacheScheduler.initCacheOptimistically();
+        healthCheckScheduler.initCacheOptimistically();
         when(emailClient.checkHealth()).thenReturn(Mono.error(new Throwable()));
 
-        healthCacheScheduler.checkMailHealth();
+        healthCheckScheduler.checkMailHealth();
 
         Health componentHealth = healthCache.getHealth("mail");
         assertThat(componentHealth, equalTo(Health.down().build()));
