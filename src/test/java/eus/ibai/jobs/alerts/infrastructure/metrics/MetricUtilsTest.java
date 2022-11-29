@@ -26,7 +26,7 @@ class MetricUtilsTest {
     }
 
     @Test
-    void should_register_active_jobs_when_recording_jobs_for_a_site() {
+    void should_record_active_jobs() {
         int expectedActiveJobs = 22;
 
         recordActiveJobs(meterRegistry, JOB_SITE_1_NAME, expectedActiveJobs);
@@ -35,8 +35,9 @@ class MetricUtilsTest {
     }
 
     @Test
-    void should_update_active_jobs_when_recording_jobs_for_a_site_again() {
+    void should_update_active_jobs_record_when_recording_jobs_for_a_site_again() {
         recordActiveJobs(meterRegistry, JOB_SITE_1_NAME, 1);
+        verifyActiveJobsRecorded(meterRegistry, JOB_SITE_1_NAME, 1);
         int expectedActiveJobs = 2;
 
         recordActiveJobs(meterRegistry, JOB_SITE_1_NAME, expectedActiveJobs);

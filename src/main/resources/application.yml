@@ -30,11 +30,14 @@ management:
     probes:
       enabled: true
     r2dbc:
-      enabled: true
+      enabled: false
+      interval: 60
     mail:
       enabled: true
+      interval: 300
     telegram:
       enabled: true
+      interval: 300
     db:
       enabled: false
     diskSpace:
@@ -60,8 +63,6 @@ application:
     periodic:
       cron: '-'
       zone: Europe/Madrid
-    health:
-      delay: 60000
 
 sites:
   - name: 'UCM: Profesor Ayudante Doctor'

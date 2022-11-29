@@ -3,9 +3,8 @@ package eus.ibai.jobs.alerts.infrastructure.telegram;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import eus.ibai.jobs.alerts.domain.notification.NotificationClient;
 import eus.ibai.jobs.alerts.domain.notification.NotificationException;
-import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.actuate.metrics.AutoTimer;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.actuate.metrics.web.reactive.client.MetricsWebClientFilterFunction;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpHeaders;
@@ -37,7 +36,7 @@ public class TelegramClient implements NotificationClient<String, String> {
 
     private final WebClient webClient;
 
-    public TelegramClient(TelegramProperties properties, MeterRegistry meterRegistry) {
+    public TelegramClient(TelegramProperties properties, @Qualifier("telegramMetricWebClientFilter") MetricsWebClientFilterFunction metricFilter) {
         this.properties = properties;
         this.webClient = WebClient.builder()
                 .baseUrl(properties.getBaseUrl())
@@ -45,7 +44,7 @@ public class TelegramClient implements NotificationClient<String, String> {
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .clientConnector(new ReactorClientHttpConnector(HttpClient.create()
                         .followRedirect(true)))
-                .filter(new MetricsWebClientFilterFunction(meterRegistry, new TelegramWebClientExchangeTagsProvider(), "http.out.telegram", AutoTimer.ENABLED))
+                .filter(metricFilter)
                 .build();
     }
 

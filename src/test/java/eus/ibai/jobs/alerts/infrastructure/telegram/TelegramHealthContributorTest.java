@@ -24,18 +24,20 @@ class TelegramHealthContributorTest {
     @Test
     void should_return_healthy_when_telegram_available() {
         when(telegramClient.checkHealth()).thenReturn(Mono.just("{}"));
+        Health expectedHealth = Health.up().build();
 
         StepVerifier.create(healthContributor.doHealthCheck())
-                .expectNext(Health.up().build())
+                .expectNext(expectedHealth)
                 .verifyComplete();
     }
 
     @Test
     void should_return_unhealthy_when_telegram_unavailable() {
         when(telegramClient.checkHealth()).thenReturn(Mono.error(new NotificationException("")));
+        Health expectedHealth = Health.down().build();
 
         StepVerifier.create(healthContributor.doHealthCheck())
-                .expectNext(Health.down().build())
+                .expectNext(expectedHealth)
                 .verifyComplete();
     }
 }

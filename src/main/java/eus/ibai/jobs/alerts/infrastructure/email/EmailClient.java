@@ -28,9 +28,9 @@ public class EmailClient implements NotificationClient<EmailNotification, Void> 
     public Flux<Void> send(List<String> emailAddresses, EmailNotification emailNotification) {
         return Flux.fromIterable(emailAddresses)
                 .flatMap(emailAddress -> sendEmail(emailNotification.from(), emailAddress, emailNotification.subject(), emailNotification.body()))
-                .doOnError(error -> {
+                .onErrorMap(error -> {
                     log.error("Failed to send email message.", error);
-                    throw new NotificationException(error);
+                    return new NotificationException(error);
                 });
     }
 
@@ -43,10 +43,6 @@ public class EmailClient implements NotificationClient<EmailNotification, Void> 
                 .doOnSuccess(mimeMessage -> log.debug("Sending Email with subject {}", subject))
                 .doOnNext(emailSender::send)
                 .doOnSuccess(mimeMessage -> log.info("Sent email with subject {}", subject))
-                .doOnError(error -> {
-                    log.error("Failed to send email message.", error);
-                    throw new NotificationException(error);
-                })
                 .then();
     }
 

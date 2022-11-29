@@ -27,7 +27,7 @@ class HealthEndpointTest extends AcceptanceTest {
                         .expectStatus().isOk()
                         .expectBody()
                         .jsonPath("$.status").isEqualTo(UP)
-                        .jsonPath("$.components.r2dbc.status").isEqualTo(UP)
+                        .jsonPath("$.components.database.status").isEqualTo(UP)
                         .jsonPath("$.components.mail.status").isEqualTo(UP)
                         .jsonPath("$.components.telegram.status").isEqualTo(UP));
 
@@ -44,7 +44,7 @@ class HealthEndpointTest extends AcceptanceTest {
                         .expectStatus().isEqualTo(SERVICE_UNAVAILABLE)
                         .expectBody()
                         .jsonPath("$.status").isEqualTo(DOWN)
-                        .jsonPath("$.components.r2dbc.status").isEqualTo(UP)
+                        .jsonPath("$.components.database.status").isEqualTo(UP)
                         .jsonPath("$.components.mail.status").isEqualTo(UP)
                         .jsonPath("$.components.telegram.status").isEqualTo(DOWN));
     }

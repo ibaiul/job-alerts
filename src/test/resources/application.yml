@@ -24,11 +24,14 @@ management:
     probes:
       enabled: true
     r2dbc:
-      enabled: true
+      enabled: false
+      interval: 1
     mail:
       enabled: true
+      interval: 1
     telegram:
       enabled: true
+      interval: 1
     db:
       enabled: false
     diskSpace:
@@ -54,8 +57,6 @@ application:
     periodic:
       cron: '-'
       zone: Europe/Madrid
-    health:
-      delay: 1000
 
 sites:
   - name: JobSite1

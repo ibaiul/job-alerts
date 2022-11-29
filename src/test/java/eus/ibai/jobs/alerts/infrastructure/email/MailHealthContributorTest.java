@@ -24,18 +24,20 @@ class MailHealthContributorTest {
     @Test
     void should_return_healthy_when_mail_server_available() {
         when(emailClient.checkHealth()).thenReturn(Mono.empty());
+        Health expectedHealth = Health.up().build();
 
         StepVerifier.create(healthContributor.doHealthCheck())
-                .expectNext(Health.up().build())
+                .expectNext(expectedHealth)
                 .verifyComplete();
     }
 
     @Test
     void should_return_unhealthy_when_mail_server_unavailable() {
         when(emailClient.checkHealth()).thenReturn(Mono.error(new NotificationException("")));
+        Health expectedHealth = Health.down().build();
 
         StepVerifier.create(healthContributor.doHealthCheck())
-                .expectNext(Health.down().build())
+                .expectNext(expectedHealth)
                 .verifyComplete();
     }
 }
