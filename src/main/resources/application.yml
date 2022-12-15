@@ -54,6 +54,13 @@ management:
     web:
       exposure:
         include: health,info
+  metrics:
+    web:
+      server:
+        request:
+          autotime:
+            enabled: true
+            percentiles: 0.50,0.95,0.99
 
 application:
   scheduler:

@@ -3,7 +3,9 @@ package eus.ibai.jobs.alerts.infrastructure.metrics;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.micrometer.NewRelicRegistry;
 import com.newrelic.telemetry.micrometer.NewRelicRegistryConfig;
+import io.micrometer.core.instrument.Meter;
 import io.micrometer.core.instrument.config.MeterFilter;
+import io.micrometer.core.instrument.distribution.DistributionStatisticConfig;
 import io.micrometer.core.instrument.util.NamedThreadFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.autoconfigure.metrics.CompositeMeterRegistryAutoConfiguration;
@@ -81,9 +83,21 @@ public class NewRelicMetricsExportAutoConfiguration {
     @Bean
     public NewRelicRegistry newRelicMeterRegistry(NewRelicRegistryConfig config) throws UnknownHostException {
         NewRelicRegistry newRelicRegistry = NewRelicRegistry.builder(config)
-                        .commonAttributes(new Attributes().put("host", InetAddress.getLocalHost().getHostName()))
-                        .build();
+                .commonAttributes(new Attributes().put("host", InetAddress.getLocalHost().getHostName()))
+                .build();
         newRelicRegistry.config().meterFilter(MeterFilter.denyNameStartsWith("jvm.threads"));
+        newRelicRegistry.config().meterFilter(new MeterFilter() {
+            @Override
+            public DistributionStatisticConfig configure(Meter.Id id, DistributionStatisticConfig config) {
+                if (id.getName().startsWith("http.out")) {
+                    return DistributionStatisticConfig.builder()
+                            .percentiles(0.50, 0.95, 0.99)
+                            .build()
+                            .merge(config);
+                }
+                return config;
+            }
+        });
         newRelicRegistry.start(new NamedThreadFactory("newrelic.micrometer.registry"));
         return newRelicRegistry;
     }
