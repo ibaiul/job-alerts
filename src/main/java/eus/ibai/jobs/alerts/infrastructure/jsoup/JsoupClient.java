@@ -2,6 +2,9 @@ package eus.ibai.jobs.alerts.infrastructure.jsoup;
 
 import eus.ibai.jobs.alerts.domain.parse.ParsingException;
 import io.micrometer.core.instrument.MeterRegistry;
+import io.netty.channel.ChannelOption;
+import io.netty.handler.timeout.ReadTimeoutHandler;
+import io.netty.handler.timeout.WriteTimeoutHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -32,7 +35,11 @@ public class JsoupClient {
                 .defaultHeader(HttpHeaders.USER_AGENT, USER_AGENT)
                 .clientConnector(new ReactorClientHttpConnector(HttpClient.create()
                         .followRedirect(true)
-                        .compress(true)))
+                        .compress(true)
+                        .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000)
+                        .doOnConnected(conn -> conn
+                                .addHandlerLast(new ReadTimeoutHandler(10))
+                                .addHandlerLast(new WriteTimeoutHandler(10)))))
                 .filter(new MetricsWebClientFilterFunction(meterRegistry, new DefaultWebClientExchangeTagsProvider(), "http.out.site", AutoTimer.ENABLED))
                 .exchangeStrategies(ExchangeStrategies.builder()
                         .codecs(codecs -> codecs.defaultCodecs().maxInMemorySize(BUFFER_SIZE))
