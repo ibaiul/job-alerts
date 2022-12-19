@@ -2,8 +2,10 @@ package eus.ibai.jobs.alerts.infrastructure.jsoup;
 
 import eus.ibai.jobs.alerts.AcceptanceTest;
 import eus.ibai.jobs.alerts.domain.parse.ParsingException;
+import io.netty.handler.timeout.ReadTimeoutException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.reactive.function.client.WebClientRequestException;
 import reactor.test.StepVerifier;
 
@@ -17,6 +19,9 @@ class JsoupClientTest extends AcceptanceTest {
 
     @Autowired
     private JsoupClient jsoupClient;
+
+    @Value("${application.site.read-timeout}")
+    private int readTimeout;
 
     @Test
     void should_retrieve_dom_when_job_site_exists() {
@@ -44,6 +49,20 @@ class JsoupClientTest extends AcceptanceTest {
                 .verifyErrorSatisfies(error -> {
                     assertThat(error, instanceOf(ParsingException.class));
                     assertThat(error.getCause(), instanceOf(WebClientRequestException.class));
+                });
+    }
+
+    @Test
+    void should_timeout_when_request_takes_too_long() {
+        int delay = (readTimeout + 1) * 1000;
+        stubSlowJobSite(delay);
+
+        StepVerifier.create(jsoupClient.parse(format(JOB_SITE_TIMEOUT_URL_FORMAT, wiremockBaseUrl())))
+                .expectNextCount(0)
+                .verifyErrorSatisfies(error -> {
+                    assertThat(error, instanceOf(ParsingException.class));
+                    assertThat(error.getCause(), instanceOf(WebClientRequestException.class));
+                    assertThat(error.getCause().getCause(), instanceOf(ReadTimeoutException.class));
                 });
     }
 }

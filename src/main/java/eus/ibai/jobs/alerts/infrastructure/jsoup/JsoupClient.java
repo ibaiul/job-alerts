@@ -8,6 +8,7 @@ import io.netty.handler.timeout.WriteTimeoutHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.metrics.AutoTimer;
 import org.springframework.boot.actuate.metrics.web.reactive.client.DefaultWebClientExchangeTagsProvider;
 import org.springframework.boot.actuate.metrics.web.reactive.client.MetricsWebClientFilterFunction;
@@ -30,16 +31,16 @@ public class JsoupClient {
 
     private final WebClient webClient;
 
-    public JsoupClient(MeterRegistry meterRegistry) {
+    public JsoupClient(MeterRegistry meterRegistry, @Value("${application.site.connect-timeout}") int connectTimeout, @Value("${application.site.read-timeout}") int readTimeout) {
         webClient = WebClient.builder()
                 .defaultHeader(HttpHeaders.USER_AGENT, USER_AGENT)
                 .clientConnector(new ReactorClientHttpConnector(HttpClient.create()
                         .followRedirect(true)
                         .compress(true)
-                        .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000)
+                        .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, connectTimeout * 1000)
                         .doOnConnected(conn -> conn
-                                .addHandlerLast(new ReadTimeoutHandler(10))
-                                .addHandlerLast(new WriteTimeoutHandler(10)))))
+                                .addHandlerLast(new ReadTimeoutHandler(readTimeout))
+                                .addHandlerLast(new WriteTimeoutHandler(readTimeout)))))
                 .filter(new MetricsWebClientFilterFunction(meterRegistry, new DefaultWebClientExchangeTagsProvider(), "http.out.site", AutoTimer.ENABLED))
                 .exchangeStrategies(ExchangeStrategies.builder()
                         .codecs(codecs -> codecs.defaultCodecs().maxInMemorySize(BUFFER_SIZE))

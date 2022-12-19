@@ -91,7 +91,7 @@ public class NewRelicMetricsExportAutoConfiguration {
             public DistributionStatisticConfig configure(Meter.Id id, DistributionStatisticConfig config) {
                 if (id.getName().startsWith("http.out")) {
                     return DistributionStatisticConfig.builder()
-                            .percentiles(0.50, 0.95, 0.99)
+                            .percentiles(0.95, 0.99)
                             .build()
                             .merge(config);
                 }

@@ -92,6 +92,10 @@ public class TestData {
 
     public static final String NON_EXISTENT_JOB_SITE_URL_FORMAT = "%s" + NON_EXISTENT_JOB_SITE_PATH;
 
+    public static final String JOB_SITE_TIMEOUT_PATH = "/job-site-timeout";
+
+    public static final String JOB_SITE_TIMEOUT_URL_FORMAT = "%s" + JOB_SITE_TIMEOUT_PATH;
+
     public static final String JOB_1_TITLE = "Job 1";
 
     public static final String JOB_1_URL_FORMAT = "%s/job1/details";
