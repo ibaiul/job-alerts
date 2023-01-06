@@ -20,16 +20,16 @@ public class JobSiteRepositoryImpl implements JobSiteRepository {
         String siteName = jobSite.getName();
         return jobSiteEntityRepository.findByName(siteName)
                 .flatMap(siteEntity -> Mono.just(jobSite)
-                                .filter(js -> !isSameSite(jobSite, siteEntity))
-                                .flatMap(js -> {
-                                    siteEntity.setName(siteName);
-                                    siteEntity.setUrl(jobSite.getUrl());
-                                    siteEntity.setParsingStrategyType(jobSite.getParsingStrategyType());
-                                    siteEntity.setParsingStrategySteps(jobSite.getParsingStrategySteps());
-                                    log.debug("Updating existing site {}", siteName);
-                                    return jobSiteEntityRepository.save(siteEntity);
-                                })
-                                .defaultIfEmpty(siteEntity)
+                        .filter(js -> !isSameSite(jobSite, siteEntity))
+                        .flatMap(js -> {
+                            siteEntity.setName(siteName);
+                            siteEntity.setUrl(jobSite.getUrl());
+                            siteEntity.setParsingStrategyType(jobSite.getParsingStrategyType());
+                            siteEntity.setParsingStrategySteps(jobSite.getParsingStrategySteps());
+                            log.debug("Updating existing site {}", siteName);
+                            return jobSiteEntityRepository.save(siteEntity);
+                        })
+                        .defaultIfEmpty(siteEntity)
                 )
                 .switchIfEmpty(Mono.defer(() -> jobSiteEntityRepository.save(new JobSiteEntity(null, siteName, jobSite.getUrl(), jobSite.getParsingStrategyType(), jobSite.getParsingStrategySteps()))))
                 .thenReturn(jobSite);
