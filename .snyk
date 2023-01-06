@@ -1,8 +1,4 @@
 ignore:
   SNYK-JAVA-IONETTY-1042268:
     - '*':
-      reason: 'No affected as Reactor Netty has explicitly enabled hostname verification by default.'
-  SNYK-ALPINE316-EXPAT-3062883:
-      - '*':
-        reason: 'No impact based on risk assessment. Will wait for Eclipse to provide a fix on the base image.'
-        expires: '2023-01-26'
+      reason: 'Not affected as Reactor Netty has explicitly enabled hostname verification by default.'
