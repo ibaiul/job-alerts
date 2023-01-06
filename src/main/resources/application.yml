@@ -54,6 +54,13 @@ management:
     web:
       exposure:
         include: health,info
+  metrics:
+    web:
+      server:
+        request:
+          autotime:
+            enabled: true
+            percentiles: 0.95,0.99
 
 application:
   scheduler:
@@ -63,6 +70,9 @@ application:
     periodic:
       cron: '-'
       zone: Europe/Madrid
+  site:
+    connect-timeout: 10
+    read-timeout: 10
 
 sites:
   - name: 'UCM: Profesor Ayudante Doctor'

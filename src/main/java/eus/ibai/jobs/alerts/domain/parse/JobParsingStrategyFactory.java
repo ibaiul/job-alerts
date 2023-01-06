@@ -15,6 +15,6 @@ public class JobParsingStrategyFactory {
         return parsingStrategies.stream()
                 .filter(parsingStrategy -> parsingStrategy.getType().equals(type))
                 .findFirst()
-                .orElseThrow(() ->new IllegalArgumentException("Unable to find parsing strategy " + type));
+                .orElseThrow(() -> new IllegalArgumentException("Unable to find parsing strategy " + type));
     }
 }

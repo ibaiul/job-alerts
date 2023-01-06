@@ -57,6 +57,9 @@ application:
     periodic:
       cron: '-'
       zone: Europe/Madrid
+  site:
+    connect-timeout: 1
+    read-timeout: 1
 
 sites:
   - name: JobSite1

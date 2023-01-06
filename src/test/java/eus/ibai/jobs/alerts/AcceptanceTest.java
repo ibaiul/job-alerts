@@ -213,6 +213,15 @@ public class AcceptanceTest {
                         .withBody(response)));
     }
 
+    protected static void stubSlowJobSite(int delay) {
+        wiremock.stubFor(get(urlMatching("/job-site-timeout"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withFixedDelay(delay)
+                        .withHeader("Content-Type", "text/html")
+                        .withBody("")));
+    }
+
     protected void verifyTelegramMessageSent(String chatId, int count) {
         wiremock.verify(exactly(count), postRequestedFor(urlEqualTo(TELEGRAM_SEND_MESSAGE_ENDPOINT))
                 .withHeader(HttpHeaders.CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
