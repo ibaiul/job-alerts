@@ -36,7 +36,6 @@ dependencies {
     // Version fixes for transient dependencies with vulnerabilities
     implementation "org.yaml:snakeyaml:2.0"
     implementation "com.jayway.jsonpath:json-path:2.8.0"
-//    implementation 'org.json:json:20220924'
 
     testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
     testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
@@ -45,7 +44,6 @@ dependencies {
     testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
     testImplementation "org.springframework.boot:spring-boot-starter-test:$springBootVersion"
     testImplementation "org.awaitility:awaitility:$awaitilityVersion"
-//    testImplementation "com.github.tomakehurst:wiremock-jre8:$wiremockVersion"
     testImplementation "com.github.tomakehurst:wiremock-standalone:$wiremockVersion"
     testImplementation "com.icegreen:greenmail:$greenmailVersion"
     testImplementation "org.testcontainers:postgresql:$testcontainersVersion"
