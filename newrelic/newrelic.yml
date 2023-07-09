@@ -16,12 +16,12 @@ common: &default_settings
     forwarding:
       enabled: true
     metrics:
-      enabled: true
+      enabled: false
   max_stack_trace_lines: 30
   attributes:
     enabled: true
   transaction_tracer:
-    enabled: true
+    enabled: false
     transaction_threshold: apdex_f
     record_sql: obfuscated
     log_sql: false
@@ -37,10 +37,10 @@ common: &default_settings
     enabled: true
     max_samples_stored: 2000
   distributed_tracing:
-    enabled: true
+    enabled: false
     exclude_newrelic_header: false
   span_events:
-    enabled: true
+    enabled: false
     max_samples_stored: 2000
     attributes:
       enabled: true
