@@ -27,13 +27,15 @@ dependencies {
     }
     implementation "org.flywaydb:flyway-core:$flywayVersion"
     implementation "org.jsoup:jsoup:$jsoupVersion"
-    implementation "com.vdurmont:emoji-java:$emojiVersion"
+    implementation ("com.vdurmont:emoji-java:$emojiVersion") {
+        exclude group: "org.json", module: "json"
+    }
     implementation "com.newrelic.telemetry:micrometer-registry-new-relic:$newrelicVersion"
     implementation "io.micrometer:micrometer-core:$micrometerVersion"
 
     // Version fixes for transient dependencies with vulnerabilities
-    implementation "org.yaml:snakeyaml:1.33"
-    implementation 'org.json:json:20220924'
+    implementation "org.yaml:snakeyaml:2.0"
+    implementation "com.jayway.jsonpath:json-path:2.8.0"
 
     testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
     testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
@@ -42,7 +44,7 @@ dependencies {
     testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
     testImplementation "org.springframework.boot:spring-boot-starter-test:$springBootVersion"
     testImplementation "org.awaitility:awaitility:$awaitilityVersion"
-    testImplementation "com.github.tomakehurst:wiremock-jre8:$wiremockVersion"
+    testImplementation "com.github.tomakehurst:wiremock-standalone:$wiremockVersion"
     testImplementation "com.icegreen:greenmail:$greenmailVersion"
     testImplementation "org.testcontainers:postgresql:$testcontainersVersion"
     testImplementation "io.projectreactor:reactor-test:$reactorVersion"
