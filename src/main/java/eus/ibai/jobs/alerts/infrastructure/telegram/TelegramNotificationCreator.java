@@ -1,6 +1,5 @@
 package eus.ibai.jobs.alerts.infrastructure.telegram;
 
-import com.vdurmont.emoji.EmojiParser;
 import eus.ibai.jobs.alerts.domain.Job;
 import eus.ibai.jobs.alerts.domain.JobSiteSummary;
 import eus.ibai.jobs.alerts.domain.notification.NotificationCreator;
@@ -10,6 +9,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static eus.ibai.jobs.alerts.infrastructure.telegram.EmojiUtils.BELL_EMOJI;
 import static java.lang.String.format;
 
 @Component
@@ -38,9 +38,7 @@ public class TelegramNotificationCreator implements NotificationCreator<String> 
                 .filter(job -> !previousJobs.contains(job))
                 .map(job -> format(JOB_LINK_TEMPLATE, job.getUrl(), job.getTitle()))
                 .collect(Collectors.joining(System.lineSeparator()));
-        String bellEmoji = EmojiParser.parseToUnicode(":bell:");
-
-        return format(SITE_UPDATED_TEMPLATE, bellEmoji, bellEmoji, jobSiteSummary.url(), jobSiteSummary.siteName(), jobSiteSummary.jobs().size(), titles);
+        return format(SITE_UPDATED_TEMPLATE, BELL_EMOJI, BELL_EMOJI, jobSiteSummary.url(), jobSiteSummary.siteName(), jobSiteSummary.jobs().size(), titles);
     }
 
     public String createWeeklySummaryNotification(JobSiteSummary jobSiteSummary) {
