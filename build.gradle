@@ -27,9 +27,6 @@ dependencies {
     }
     implementation "org.flywaydb:flyway-core:$flywayVersion"
     implementation "org.jsoup:jsoup:$jsoupVersion"
-    implementation ("com.vdurmont:emoji-java:$emojiVersion") {
-        exclude group: "org.json", module: "json"
-    }
     implementation "com.newrelic.telemetry:micrometer-registry-new-relic:$newrelicVersion"
     implementation "io.micrometer:micrometer-core:$micrometerVersion"
 
