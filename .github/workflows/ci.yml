@@ -57,13 +57,9 @@ jobs:
           comment_mode: off
 
       - name: Sonar
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
-          SONAR_PROJECT: ${{ secrets.SONAR_PROJECT }}
         run: |
           BRANCH_NAME=$(echo ${GITHUB_REF} | sed 's/refs\///g' | sed 's/heads\///g' | sed 's/\/merge//g' | sed 's/pull\//PR-/g')
-          ./gradlew sonar -Dsonar.login=${SONAR_TOKEN}  -Dsonar.branch.name=${BRANCH_NAME} -Dsonar.organization=${SONAR_ORGANIZATION} -Dsonar.projectKey=${SONAR_PROJECT}
+          ./gradlew sonar -Dsonar.token=${{ secrets.SONAR_TOKEN }}  -Dsonar.branch.name=${BRANCH_NAME} -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }} -Dsonar.projectKey=${{ vars.SONAR_PROJECT }}
 
       - name: Package
         run: ./gradlew bootJar
@@ -72,21 +68,19 @@ jobs:
         uses: snyk/actions/gradle-jdk17@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-          SNYK_ORGANIZATION: ${{ secrets.SNYK_ORGANIZATION }}
-          SNYK_PROJECT: ${{ secrets.SNYK_PROJECT }}
           JAVA_HOME: /opt/java/openjdk
         with:
-          args: --severity-threshold=high --policy-path=. --project-name=${SNYK_PROJECT} --org=${SNYK_ORGANIZATION}
+          args: --severity-threshold=high --policy-path=. --project-name=${{ vars.SNYK_PROJECT }} --org=${{ vars.SNYK_ORGANIZATION }}
           command: ${{ env.SNYK_ACTION }}
 
       - name: Build Docker image
         uses: docker/build-push-action@v3
-        env:
-          IMAGE_NAME: ${{ secrets.DOCKER_HUB_IMAGE }}
         with:
           context: .
-          build-args: NEWRELIC_AGENT_VERSION=8.5.0
-          tags: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+          build-args: NEWRELIC_AGENT_VERSION=${{ vars.NEWRELIC_AGENT_VERSION }}
+          tags: |
+            ${{ vars.DOCKER_HUB_IMAGE }}:${{ github.sha }}
+            ${{ vars.DOCKER_HUB_IMAGE }}:${{ env.RELEASE_TAG }}
           load: true
           push: false
 
@@ -94,12 +88,9 @@ jobs:
         uses: snyk/actions/docker@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-          SNYK_ORGANIZATION: ${{ secrets.SNYK_ORGANIZATION }}
-          SNYK_PROJECT: ${{ secrets.SNYK_PROJECT }}
-          IMAGE_NAME: ${{ secrets.DOCKER_HUB_IMAGE }}
         with:
-          image: ${{ env.IMAGE_NAME }}:${{ github.sha }}
-          args: --file=Dockerfile --severity-threshold=high --policy-path=. --project-name=${SNYK_PROJECT}-docker --org=${SNYK_ORGANIZATION}
+          image: ${{ vars.DOCKER_HUB_IMAGE }}:${{ github.sha }}
+          args: --file=Dockerfile --severity-threshold=high --policy-path=. --project-name=${{ vars.SNYK_PROJECT }}-docker --org=${{ vars.SNYK_ORGANIZATION }}
           command: ${{ env.SNYK_ACTION }}
 
       - name: Login to DockerHub
@@ -111,10 +102,4 @@ jobs:
 
       - name: Docker Publish
         if: github.event_name == 'pull_request' || github.ref == 'refs/heads/master'
-        uses: docker/build-push-action@v3
-        env:
-          IMAGE_NAME: ${{ secrets.DOCKER_HUB_IMAGE }}
-        with:
-          context: .
-          tags: ${{ env.IMAGE_NAME }}:${{ github.sha }},${{ env.IMAGE_NAME }}:${{ env.RELEASE_TAG }}
-          push: true
+        run: docker push ${{ vars.DOCKER_HUB_IMAGE }} -a
