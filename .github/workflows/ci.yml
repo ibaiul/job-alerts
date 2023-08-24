@@ -85,6 +85,7 @@ jobs:
           IMAGE_NAME: ${{ secrets.DOCKER_HUB_IMAGE }}
         with:
           context: .
+          build-args: NEWRELIC_AGENT_VERSION=8.5.0
           tags: ${{ env.IMAGE_NAME }}:${{ github.sha }}
           load: true
           push: false
