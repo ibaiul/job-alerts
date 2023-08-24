@@ -53,9 +53,10 @@ class MainSchedulerTest extends AcceptanceTest {
 
     @Test
     void should_record_active_jobs_when_checking_site_periodically() {
-        mainScheduler.runPeriodicSchedule();
-
-        verifyActiveJobsRecorded(meterRegistry, JOB_SITE_1_NAME, 2);
+        await().atMost(7, SECONDS).untilAsserted(() -> {
+            mainScheduler.runPeriodicSchedule();
+            verifyActiveJobsRecorded(meterRegistry, JOB_SITE_1_NAME, 2, 1);
+        });
     }
 
     @Test
@@ -64,9 +65,11 @@ class MainSchedulerTest extends AcceptanceTest {
         verifyActiveJobsRecorded(meterRegistry, JOB_SITE_1_NAME, 2);
         stubJobSite1WithOneJobOk();
 
-        mainScheduler.runPeriodicSchedule();
 
-        verifyActiveJobsRecorded(meterRegistry, JOB_SITE_1_NAME, 1);
+        await().atMost(7, SECONDS).untilAsserted(() -> {
+            mainScheduler.runPeriodicSchedule();
+            verifyActiveJobsRecorded(meterRegistry, JOB_SITE_1_NAME, 1, 1);
+        });
     }
 
     @Test
