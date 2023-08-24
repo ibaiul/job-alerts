@@ -1,5 +1,6 @@
 package eus.ibai.jobs.alerts.infrastructure.health;
 
+import jakarta.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.actuate.health.Health;
@@ -11,7 +12,6 @@ import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.util.function.Tuples;
 
-import javax.annotation.PostConstruct;
 import java.util.List;
 
 import static java.util.concurrent.TimeUnit.SECONDS;

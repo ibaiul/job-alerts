@@ -1,7 +1,7 @@
 package eus.ibai.jobs.alerts.infrastructure.jsoup;
 
 import eus.ibai.jobs.alerts.domain.parse.ParsingException;
-import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.observation.ObservationRegistry;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
@@ -9,13 +9,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.actuate.metrics.AutoTimer;
-import org.springframework.boot.actuate.metrics.web.reactive.client.DefaultWebClientExchangeTagsProvider;
-import org.springframework.boot.actuate.metrics.web.reactive.client.MetricsWebClientFilterFunction;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.ClientResponse;
+import org.springframework.web.reactive.function.client.DefaultClientRequestObservationConvention;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -31,7 +29,8 @@ public class JsoupClient {
 
     private final WebClient webClient;
 
-    public JsoupClient(MeterRegistry meterRegistry, @Value("${application.site.connect-timeout}") int connectTimeout, @Value("${application.site.read-timeout}") int readTimeout) {
+    public JsoupClient(@Value("${application.site.connect-timeout}") int connectTimeout, @Value("${application.site.read-timeout}") int readTimeout,
+                       ObservationRegistry observationRegistry) {
         webClient = WebClient.builder()
                 .defaultHeader(HttpHeaders.USER_AGENT, USER_AGENT)
                 .clientConnector(new ReactorClientHttpConnector(HttpClient.create()
@@ -41,7 +40,8 @@ public class JsoupClient {
                         .doOnConnected(conn -> conn
                                 .addHandlerLast(new ReadTimeoutHandler(readTimeout))
                                 .addHandlerLast(new WriteTimeoutHandler(readTimeout)))))
-                .filter(new MetricsWebClientFilterFunction(meterRegistry, new DefaultWebClientExchangeTagsProvider(), "http.out.site", AutoTimer.ENABLED))
+                .observationConvention(new DefaultClientRequestObservationConvention("http.out.site"))
+                .observationRegistry(observationRegistry)
                 .exchangeStrategies(ExchangeStrategies.builder()
                         .codecs(codecs -> codecs.defaultCodecs().maxInMemorySize(BUFFER_SIZE))
                         .build())
@@ -62,7 +62,7 @@ public class JsoupClient {
         return httpResponse.bodyToMono(String.class)
                 .handle((body, sink) -> {
                     if (httpResponse.statusCode().isError()) {
-                        sink.error(new ParsingException("Jsoup request failed for site " + siteUrl + ". Status: " + httpResponse.rawStatusCode() + ",  Response: " + body));
+                        sink.error(new ParsingException("Jsoup request failed for site " + siteUrl + ". Status: " + httpResponse.statusCode() + ",  Response: " + body));
                     } else {
                         sink.next(body);
                     }

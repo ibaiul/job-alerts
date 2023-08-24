@@ -56,11 +56,10 @@ management:
         include: health,info
   metrics:
     web:
-      server:
-        request:
-          autotime:
-            enabled: true
-            percentiles: 0.95,0.99
+      distribution:
+        percentiles[http.server.requests]: 0.95, 0.99
+        percentiles-histogram[http.server.requests]: true
+        slo[http.server.requests]: 100ms, 500ms
 
 application:
   scheduler:

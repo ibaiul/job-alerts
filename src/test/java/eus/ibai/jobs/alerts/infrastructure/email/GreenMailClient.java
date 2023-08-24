@@ -23,6 +23,15 @@ public class GreenMailClient {
                 .then();
     }
 
+    public Mono<Void> reset() {
+        return webClient.post().uri("/api/service/reset")
+                .retrieve()
+                .bodyToMono(String.class)
+                .filter(response -> response.contains("Performed reset"))
+                .switchIfEmpty(Mono.error(new IllegalStateException()))
+                .then();
+    }
+
     public Flux<TestMimeMessage> getAllEmails() {
         return webClient.get().uri("/api/mail")
                 .retrieve()
