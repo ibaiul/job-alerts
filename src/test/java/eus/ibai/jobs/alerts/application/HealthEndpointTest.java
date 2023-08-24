@@ -48,4 +48,22 @@ class HealthEndpointTest extends AcceptanceTest {
                         .jsonPath("$.components.mail.status").isEqualTo(UP)
                         .jsonPath("$.components.telegram.status").isEqualTo(DOWN));
     }
+
+    @Test
+    void should_return_ok_when_application_ready() {
+        await().atMost(3, SECONDS).untilAsserted(
+                () -> webTestClient.get().uri("/actuator/health/readiness")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .exchange()
+                        .expectStatus().isOk());
+    }
+
+    @Test
+    void should_return_ok_when_application_live() {
+        await().atMost(3, SECONDS).untilAsserted(
+                () -> webTestClient.get().uri("/actuator/health/liveness")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .exchange()
+                        .expectStatus().isOk());
+    }
 }
