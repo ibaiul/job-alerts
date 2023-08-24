@@ -55,11 +55,10 @@ management:
       exposure:
         include: health,info
   metrics:
-    web:
-      distribution:
-        percentiles[http.server.requests]: 0.95, 0.99
-        percentiles-histogram[http.server.requests]: true
-        slo[http.server.requests]: 100ms, 500ms
+    distribution:
+      percentiles[http.server.requests]: 0.95, 0.99
+      percentiles-histogram[http.server.requests]: true
+      slo[http.server.requests]: 100ms, 500ms
 
 application:
   scheduler:
