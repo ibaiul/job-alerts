@@ -2,7 +2,7 @@ package eus.ibai.jobs.alerts.infrastructure.log;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.server.RequestPath;
 import org.springframework.stereotype.Component;
 import org.springframework.util.MultiValueMap;
@@ -23,7 +23,7 @@ public class InboundErrorResponseLoggingFilter implements WebFilter {
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         return chain.filter(exchange)
                 .doFinally(signalType -> {
-                    HttpStatus statusCode = exchange.getResponse().getStatusCode();
+                    HttpStatusCode statusCode = exchange.getResponse().getStatusCode();
                     if (statusCode == null || statusCode.isError()) {
                         int status = statusCode != null ? statusCode.value() : 0;
                         RequestPath requestPath = exchange.getRequest().getPath();

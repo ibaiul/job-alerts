@@ -10,14 +10,13 @@ import eus.ibai.jobs.alerts.domain.parse.JobParsingStrategy;
 import eus.ibai.jobs.alerts.domain.parse.JobParsingStrategyFactory;
 import eus.ibai.jobs.alerts.domain.repository.JobRepository;
 import eus.ibai.jobs.alerts.domain.repository.JobSiteRepository;
+import jakarta.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import javax.annotation.PostConstruct;
 
 @Slf4j
 @Component

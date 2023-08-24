@@ -2,6 +2,7 @@ package eus.ibai.jobs.alerts.infrastructure.email;
 
 import eus.ibai.jobs.alerts.domain.notification.NotificationClient;
 import eus.ibai.jobs.alerts.domain.notification.NotificationException;
+import jakarta.mail.internet.MimeMessage;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -13,7 +14,6 @@ import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import javax.mail.internet.MimeMessage;
 import java.util.List;
 
 @Slf4j
