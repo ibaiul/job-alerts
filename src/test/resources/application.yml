@@ -53,9 +53,29 @@ management:
       enabled: true
   metrics:
     distribution:
-      percentiles[http.server.requests]: 0.95, 0.99
-      percentiles-histogram[http.server.requests]: true
-      slo[http.server.requests]: 100ms, 500ms
+      percentiles:
+        http:
+          server:
+            requests: 0.95, 0.99
+      percentiles-histogram:
+        http:
+          server:
+            requests: true
+      slo:
+        http:
+          server:
+            requests: 100ms, 500ms
+    exclude:
+      - executor
+      - hikaricp
+      - jvm
+      - logback
+      - process
+      - r2dbc
+      - spring
+  observations:
+    exclude:
+      - spring.security
 
 application:
   scheduler:
@@ -93,13 +113,13 @@ telegram:
   botKey: 1234:abcd
 
 newrelic:
+  enabled: false # OpenTelemetry metrics bridge does not support reading measurements
   app:
     name: JobAlerts_test - Micrometer
-  metric:
+  metrics:
     step: 1
-    ingest:
-      uri: http://localhost:xxxx/metric/v1
-  key:
+    ingest-uri: http://localhost:xxxx/opentelemetry.proto.collector.metrics.v1.MetricsService/Export
+  keys:
     license: licenseKey
 
 info:

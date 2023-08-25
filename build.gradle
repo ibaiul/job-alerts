@@ -22,17 +22,23 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-starter-mail:$springBootVersion"
     implementation "org.springframework.boot:spring-boot-starter-actuator:$springBootVersion"
     runtimeOnly "org.postgresql:postgresql:$postgresqlVersion"
-    runtimeOnly ("io.r2dbc:r2dbc-postgresql:$r2dbcVersion") {
-        exclude group: "io.projectreactor.netty", module: "reactor-netty"
-    }
+    runtimeOnly "org.postgresql:r2dbc-postgresql:$postgresqlR2dbcVersion"
     implementation "org.flywaydb:flyway-core:$flywayVersion"
     implementation "org.jsoup:jsoup:$jsoupVersion"
-    implementation "com.newrelic.telemetry:micrometer-registry-new-relic:$newrelicVersion"
     implementation "io.micrometer:micrometer-core:$micrometerVersion"
+    implementation "io.opentelemetry:opentelemetry-sdk:$openTelemetryVersion"
+    implementation "io.opentelemetry.instrumentation:opentelemetry-micrometer-1.5:$openTelemetryVersion-alpha"
+    implementation "io.opentelemetry:opentelemetry-exporter-otlp:$openTelemetryVersion"
+    implementation "com.newrelic.telemetry:telemetry-core:$newrelicTelemetryVersion"
+    implementation "com.newrelic.telemetry:telemetry-http-okhttp:$newrelicTelemetryVersion"
 
     // Version fixes for transient dependencies with vulnerabilities
+    // SNYK-JAVA-ORGYAML-3152153
     implementation "org.yaml:snakeyaml:2.0"
-    implementation "com.jayway.jsonpath:json-path:2.8.0"
+    // SNYK-JAVA-COMSQUAREUPOKIO-5773320 -> Waiting for okhttp +4.11.0 to include okio +3.4.0
+    implementation "com.squareup.okio:okio:$okioVersion"
+    // SNYK-JAVA-COMSQUAREUPOKIO-5820002 -> Waiting for okhttp +4.11.0 to include okio-jvm +3.4.0
+    implementation "com.squareup.okio:okio-jvm:$okioVersion"
 
     testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
     testCompileOnly "org.projectlombok:lombok:${lombokVersion}"

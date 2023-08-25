@@ -11,6 +11,5 @@ telegram:
   baseUrl: http://wiremock:8080
 
 newrelic:
-  metric:
-    ingest:
-      uri: http://wiremock:8080/metric/v1
+  metrics:
+    ingest-uri: http://wiremock:8080/metric/v1
