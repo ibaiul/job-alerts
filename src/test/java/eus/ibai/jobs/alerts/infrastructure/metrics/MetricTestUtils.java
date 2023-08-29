@@ -16,7 +16,11 @@ import static org.springframework.boot.actuate.health.Status.UP;
 public class MetricTestUtils {
 
     public static void verifyActiveJobsRecorded(MeterRegistry meterRegistry, String siteName, int activeJobs) {
-        await().atMost(7, TimeUnit.SECONDS).ignoreExceptions().untilAsserted(() -> {
+        verifyActiveJobsRecorded(meterRegistry, siteName, activeJobs, 7);
+    }
+
+    public static void verifyActiveJobsRecorded(MeterRegistry meterRegistry, String siteName, int activeJobs, int waitSeconds) {
+        await().atMost(waitSeconds, TimeUnit.SECONDS).ignoreExceptions().untilAsserted(() -> {
             Gauge activeJobsGauge = meterRegistry.find("jobs.active")
                     .tag("site_name", siteName)
                     .gauge();

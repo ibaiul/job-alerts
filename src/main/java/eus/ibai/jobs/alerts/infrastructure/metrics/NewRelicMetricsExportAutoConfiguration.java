@@ -1,104 +1,106 @@
 package eus.ibai.jobs.alerts.infrastructure.metrics;
 
-import com.newrelic.telemetry.Attributes;
-import com.newrelic.telemetry.micrometer.NewRelicRegistry;
-import com.newrelic.telemetry.micrometer.NewRelicRegistryConfig;
-import io.micrometer.core.instrument.Meter;
+import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.config.MeterFilter;
-import io.micrometer.core.instrument.distribution.DistributionStatisticConfig;
-import io.micrometer.core.instrument.util.NamedThreadFactory;
-import org.springframework.beans.factory.annotation.Value;
+import io.micrometer.observation.ObservationPredicate;
+import io.micrometer.observation.ObservationRegistry;
+import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter;
+import io.opentelemetry.instrumentation.micrometer.v1_5.OpenTelemetryMeterRegistry;
+import io.opentelemetry.sdk.OpenTelemetrySdk;
+import io.opentelemetry.sdk.metrics.Aggregation;
+import io.opentelemetry.sdk.metrics.InstrumentType;
+import io.opentelemetry.sdk.metrics.SdkMeterProvider;
+import io.opentelemetry.sdk.metrics.export.AggregationTemporalitySelector;
+import io.opentelemetry.sdk.metrics.export.DefaultAggregationSelector;
+import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader;
+import io.opentelemetry.sdk.resources.Resource;
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.actuate.autoconfigure.metrics.CompositeMeterRegistryAutoConfiguration;
+import org.springframework.boot.actuate.autoconfigure.metrics.MeterRegistryCustomizer;
 import org.springframework.boot.actuate.autoconfigure.metrics.MetricsAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.metrics.export.simple.SimpleMetricsExportAutoConfiguration;
+import org.springframework.boot.actuate.autoconfigure.observation.ObservationRegistryCustomizer;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.Duration;
+import java.util.UUID;
 
+@RequiredArgsConstructor
 @Configuration
 @AutoConfigureBefore({CompositeMeterRegistryAutoConfiguration.class, SimpleMetricsExportAutoConfiguration.class})
 @AutoConfigureAfter(MetricsAutoConfiguration.class)
-@ConditionalOnClass(NewRelicRegistry.class)
+@ConditionalOnProperty(name = "newrelic.enabled", havingValue = "true")
 public class NewRelicMetricsExportAutoConfiguration {
 
-    private final String appName;
+    private final NewRelicProperties newRelicProperties;
 
-    private final String licenseKey;
+    private final MetricProperties metricProperties;
 
-    private final String metricIngestUri;
-
-    private final int metricStepInSeconds;
-
-    public NewRelicMetricsExportAutoConfiguration(@Value("${newrelic.app.name}") String appName,
-                                                  @Value("${newrelic.key.license}") String licenseKey,
-                                                  @Value("${newrelic.metric.ingest.uri}") String metricIngestUri,
-                                                  @Value("${newrelic.metric.step}") int metricStepInSeconds) {
-        this.appName = appName;
-        this.licenseKey = licenseKey;
-        this.metricIngestUri = metricIngestUri;
-        this.metricStepInSeconds = metricStepInSeconds;
+    @Bean
+    public OpenTelemetry openTelemetry() throws UnknownHostException {
+        String instanceId = UUID.randomUUID().toString();
+        return OpenTelemetrySdk.builder()
+                .setMeterProvider(
+                        SdkMeterProvider.builder()
+                                .setResource(
+                                        Resource.getDefault().toBuilder()
+                                                .put("service.name", newRelicProperties.getApp().name())
+                                                .put("service.instance.id", instanceId)
+                                                .put("instrumentation.provider", "micrometer")
+                                                .put("host", InetAddress.getLocalHost().getHostName())
+                                                .build())
+                                .registerMetricReader(
+                                        PeriodicMetricReader.builder(
+                                                        OtlpGrpcMetricExporter.builder()
+                                                                .setEndpoint(newRelicProperties.getMetrics().ingestUri())
+                                                                .addHeader("api-key", newRelicProperties.getKeys().license())
+                                                                .setAggregationTemporalitySelector(
+                                                                        AggregationTemporalitySelector.deltaPreferred())
+                                                                .setDefaultAggregationSelector(
+                                                                        DefaultAggregationSelector.getDefault()
+                                                                                .with(
+                                                                                        InstrumentType.HISTOGRAM,
+                                                                                        Aggregation.base2ExponentialBucketHistogram()))
+                                                                .build())
+                                                .setInterval(Duration.ofSeconds(newRelicProperties.getMetrics().step()))
+                                                .build())
+                                .build())
+                .build();
     }
 
     @Bean
-    public NewRelicRegistryConfig newRelicConfig() {
-        return new NewRelicRegistryConfig() {
-            @Override
-            public String get(String key) {
-                return null;
-            }
+    public MeterRegistry meterRegistry(OpenTelemetry openTelemetry) {
+        return OpenTelemetryMeterRegistry.builder(openTelemetry).setMicrometerHistogramGaugesEnabled(true).build();
+    }
 
-            @Override
-            public String uri() {
-                return metricIngestUri;
-            }
-
-            @Override
-            public String apiKey() {
-                return licenseKey;
-            }
-
-            @Override
-            public boolean useLicenseKey() {
-                return true;
-            }
-
-            @Override
-            public Duration step() {
-                return Duration.ofSeconds(metricStepInSeconds);
-            }
-
-            @Override
-            public String serviceName() {
-                return appName;
+    @Bean
+    @ConditionalOnProperty(name = "management.metrics.exclude[0]")
+    MeterRegistryCustomizer<MeterRegistry> excludeMetrics() {
+        return registry -> {
+            for (String excludedMetricPrefix : metricProperties.getMetrics().exclude()) {
+                registry.config().meterFilter(MeterFilter.denyNameStartsWith(excludedMetricPrefix));
             }
         };
     }
 
     @Bean
-    public NewRelicRegistry newRelicMeterRegistry(NewRelicRegistryConfig config) throws UnknownHostException {
-        NewRelicRegistry newRelicRegistry = NewRelicRegistry.builder(config)
-                .commonAttributes(new Attributes().put("host", InetAddress.getLocalHost().getHostName()))
-                .build();
-        newRelicRegistry.config().meterFilter(MeterFilter.denyNameStartsWith("jvm.threads"));
-        newRelicRegistry.config().meterFilter(new MeterFilter() {
-            @Override
-            public DistributionStatisticConfig configure(Meter.Id id, DistributionStatisticConfig config) {
-                if (id.getName().startsWith("http.out")) {
-                    return DistributionStatisticConfig.builder()
-                            .percentiles(0.95, 0.99)
-                            .build()
-                            .merge(config);
-                }
-                return config;
+    @ConditionalOnProperty(name = "management.observations.exclude[0]")
+    ObservationRegistryCustomizer<ObservationRegistry> excludeObservations() {
+        return registry -> {
+            for (String excludedObservationPrefix : metricProperties.getObservations().exclude()) {
+                registry.observationConfig().observationPredicate(denyNameStartsWith(excludedObservationPrefix));
             }
-        });
-        newRelicRegistry.start(new NamedThreadFactory("newrelic.micrometer.registry"));
-        return newRelicRegistry;
+        };
+    }
+
+    private ObservationPredicate denyNameStartsWith(String prefix) {
+        return (name, context) -> !name.startsWith(prefix);
     }
 }

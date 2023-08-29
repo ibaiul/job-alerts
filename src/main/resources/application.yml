@@ -59,9 +59,22 @@ management:
       enabled: true
   metrics:
     distribution:
-      percentiles[http.server.requests]: 0.95, 0.99
-      percentiles-histogram[http.server.requests]: true
-      slo[http.server.requests]: 100ms, 500ms
+      percentiles:
+        http:
+          server:
+            requests: 0.95, 0.99
+      percentiles-histogram:
+        http:
+          server:
+            requests: true
+      slo:
+        http:
+          server:
+            requests: 100ms, 500ms
+    exclude:
+      - logback
+  observations:
+    exclude:
 
 application:
   scheduler:
@@ -134,13 +147,13 @@ telegram:
   botKey: 1234:abcd
 
 newrelic:
+  enabled: true
   app:
     name: JobAlerts_local - Micrometer
-  metric:
+  metrics:
     step: 10
-    ingest:
-      uri: http://localhost:18080/metric/v1
-  key:
+    ingest-uri: http://localhost:18080
+  keys:
     license: licenseKey
 
 info:
