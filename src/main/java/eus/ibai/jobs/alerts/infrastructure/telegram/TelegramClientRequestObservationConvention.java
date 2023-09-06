@@ -26,7 +26,6 @@ public class TelegramClientRequestObservationConvention extends DefaultClientReq
     }
 
     @Override
-
     protected KeyValue httpUrl(ClientRequestObservationContext context) {
         if (context.getRequest() != null) {
             return KeyValue.of(HighCardinalityKeyNames.HTTP_URL, extractPathWithoutBotToken(context.getRequest().url().toASCIIString()));
