@@ -51,6 +51,7 @@ dependencies {
     testImplementation "com.icegreen:greenmail:$greenmailVersion"
     testImplementation "org.testcontainers:postgresql:$testcontainersVersion"
     testImplementation "io.projectreactor:reactor-test:$reactorVersion"
+    testImplementation "io.r2dbc:r2dbc-h2:$h2R2dbcVersion"
 }
 
 springBoot {
