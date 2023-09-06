@@ -65,17 +65,6 @@ management:
         http:
           server:
             requests: 100ms, 500ms
-    exclude:
-      - executor
-      - hikaricp
-      - jvm
-      - logback
-      - process
-      - r2dbc
-      - spring
-  observations:
-    exclude:
-      - spring.security
 
 application:
   scheduler:
@@ -118,7 +107,7 @@ newrelic:
     name: JobAlerts_test - Micrometer
   metrics:
     step: 1
-    ingest-uri: http://localhost:xxxx/opentelemetry.proto.collector.metrics.v1.MetricsService/Export
+    ingest-uri: https://grpc-server/opentelemetry.proto.collector.metrics.v1.MetricsService/Export
   keys:
     license: licenseKey
 
