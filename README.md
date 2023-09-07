@@ -33,7 +33,7 @@ a more specialized tool such as Selenium with a headless browser can be used.
 
 ### Alerts
 
-At the moment Telegram (Bot API) and Email (SMTP) alerts are supported.
+At the moment Telegram (Bot API) and Email (SMTP) alerts are supported, although other notification means can be easily added by extending the interfaces in the `notification` package. 
 
 <img src="img/telegram-notification.jpeg" width="25%">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="img/email-notification.jpeg" width="25%">
 
