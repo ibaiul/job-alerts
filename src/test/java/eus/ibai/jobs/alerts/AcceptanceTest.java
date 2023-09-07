@@ -38,7 +38,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class AcceptanceTest {
+public abstract class AcceptanceTest {
 
     private static final String TELEGRAM_SEND_MESSAGE_ENDPOINT = "/bot1234:abcd/sendMessage";
 

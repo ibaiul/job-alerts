@@ -2,7 +2,7 @@ server:
   port: 0
 spring:
   r2dbc:
-    url: r2dbc:postgresql://localhost:xxx/acceptance-test-db
+    url: r2dbc:h2:mem:///integration-test-db
     username: sa
     password: sa
   mail:
@@ -13,7 +13,7 @@ spring:
   flyway:
     user: sa
     password: sa
-    url: jdbc:postgresql://localhost:xxx/acceptance-test-db
+    url: jdbc:h2:mem:integration-test-db;DB_CLOSE_DELAY=-1
   task:
     scheduling:
       pool:
@@ -65,17 +65,6 @@ management:
         http:
           server:
             requests: 100ms, 500ms
-    exclude:
-      - executor
-      - hikaricp
-      - jvm
-      - logback
-      - process
-      - r2dbc
-      - spring
-  observations:
-    exclude:
-      - spring.security
 
 application:
   scheduler:
@@ -118,7 +107,7 @@ newrelic:
     name: JobAlerts_test - Micrometer
   metrics:
     step: 1
-    ingest-uri: http://localhost:xxxx/opentelemetry.proto.collector.metrics.v1.MetricsService/Export
+    ingest-uri: https://grpc-server/opentelemetry.proto.collector.metrics.v1.MetricsService/Export
   keys:
     license: licenseKey
 

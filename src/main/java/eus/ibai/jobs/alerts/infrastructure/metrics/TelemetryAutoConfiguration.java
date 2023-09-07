@@ -37,7 +37,7 @@ import java.util.UUID;
 @AutoConfigureBefore({CompositeMeterRegistryAutoConfiguration.class, SimpleMetricsExportAutoConfiguration.class})
 @AutoConfigureAfter(MetricsAutoConfiguration.class)
 @ConditionalOnProperty(name = "newrelic.enabled", havingValue = "true")
-public class NewRelicMetricsExportAutoConfiguration {
+public class TelemetryAutoConfiguration {
 
     private final NewRelicProperties newRelicProperties;
 

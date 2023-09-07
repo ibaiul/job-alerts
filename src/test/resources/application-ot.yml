@@ -1,0 +1,12 @@
+newrelic:
+  enabled: true
+
+management:
+  metrics:
+    exclude:
+      - jvm
+      - spring.data
+  observations:
+    exclude:
+      - http.server.requests
+      - http.out.telegram

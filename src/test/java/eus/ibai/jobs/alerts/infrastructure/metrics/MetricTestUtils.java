@@ -4,13 +4,14 @@ import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.boot.actuate.health.Status;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.*;
 import static org.springframework.boot.actuate.health.Status.UP;
 
 public class MetricTestUtils {
@@ -36,6 +37,13 @@ public class MetricTestUtils {
                     .gauge();
             assertThat(componentHealthGauge, notNullValue());
             assertThat(componentHealthGauge.value(), equalTo(status == UP ? 1.0d : 0.0d));
+        });
+    }
+
+    public static void verifyMetricNamePrefixNotRecorded(MeterRegistry meterRegistry, String metricNamePrefix) {
+        await().during(3, SECONDS).ignoreExceptions().untilAsserted(() -> {
+            List<String> meterNames = meterRegistry.getMeters().stream().map(meter -> meter.getId().getName()).toList();
+            assertThat(meterNames, not(hasItem(startsWith(metricNamePrefix))));
         });
     }
 }

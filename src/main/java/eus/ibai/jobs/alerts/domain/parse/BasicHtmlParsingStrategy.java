@@ -51,7 +51,7 @@ public class BasicHtmlParsingStrategy implements JobParsingStrategy {
         if (href.startsWith("http")) {
             return href;
         } else if (!href.startsWith("/")) {
-            log.warn("Malformed job url found. Href: {}, Site: {}", href, siteUrl);
+            log.debug("Ignoring job url with relative path. Href: {}, Site: {}", href, siteUrl);
             return null;
         }
         return baseUrl(siteUrl).concat(href);
