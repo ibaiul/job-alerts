@@ -24,20 +24,16 @@ public class JobSiteRepositoryImpl implements JobSiteRepository {
                         .flatMap(js -> {
                             siteEntity.setName(siteName);
                             siteEntity.setUrl(jobSite.getUrl());
-                            siteEntity.setParsingStrategyType(jobSite.getParsingStrategyType());
-                            siteEntity.setParsingStrategySteps(jobSite.getParsingStrategySteps());
                             log.debug("Updating existing site {}", siteName);
                             return jobSiteEntityRepository.save(siteEntity);
                         })
                         .defaultIfEmpty(siteEntity)
                 )
-                .switchIfEmpty(Mono.defer(() -> jobSiteEntityRepository.save(new JobSiteEntity(null, siteName, jobSite.getUrl(), jobSite.getParsingStrategyType(), jobSite.getParsingStrategySteps()))))
+                .switchIfEmpty(Mono.defer(() -> jobSiteEntityRepository.save(new JobSiteEntity(null, siteName, jobSite.getUrl()))))
                 .thenReturn(jobSite);
     }
 
     private boolean isSameSite(JobSite jobSite, JobSiteEntity siteEntity) {
-        return jobSite.getName().equals(siteEntity.getName()) && jobSite.getUrl().equals(siteEntity.getUrl())
-                && jobSite.getParsingStrategyType().equals(siteEntity.getParsingStrategyType())
-                && jobSite.getParsingStrategySteps().equals(siteEntity.getParsingStrategySteps());
+        return jobSite.getName().equals(siteEntity.getName()) && jobSite.getUrl().equals(siteEntity.getUrl());
     }
 }

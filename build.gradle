@@ -25,6 +25,7 @@ dependencies {
     runtimeOnly "org.postgresql:r2dbc-postgresql:$postgresqlR2dbcVersion"
     implementation "org.flywaydb:flyway-core:$flywayVersion"
     implementation "org.jsoup:jsoup:$jsoupVersion"
+    implementation 'org.seleniumhq.selenium:selenium-java:4.15.0'
     implementation "io.micrometer:micrometer-core:$micrometerVersion"
     implementation "io.opentelemetry:opentelemetry-sdk:$openTelemetryVersion"
     implementation "io.opentelemetry.instrumentation:opentelemetry-micrometer-1.5:$openTelemetryVersion-alpha"
@@ -52,6 +53,9 @@ dependencies {
     testImplementation "org.testcontainers:postgresql:$testcontainersVersion"
     testImplementation "io.projectreactor:reactor-test:$reactorVersion"
     testImplementation "io.r2dbc:r2dbc-h2:$h2R2dbcVersion"
+    testImplementation 'org.testcontainers:junit-jupiter:1.19.1'
+    implementation 'org.testcontainers:selenium:1.19.1'
+    testImplementation "org.wiremock.integrations.testcontainers:wiremock-testcontainers-module:1.0-alpha-13"
 }
 
 springBoot {

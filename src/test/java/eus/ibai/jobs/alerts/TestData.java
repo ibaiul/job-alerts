@@ -76,12 +76,6 @@ public class TestData {
             }
             """;
 
-    public static final String NEW_RELIC_SEND_METRICS_SUCCESS_RESPONSE = """
-            {
-              "requestId": "00000000-0000-0000-0000-000000000000"
-            }
-            """;
-
     public static final String JOB_SITE_1_NAME = "JobSite1";
 
     public static final String JOB_SITE_1_PATH = "/job-site-1";
@@ -127,6 +121,54 @@ public class TestData {
                     </ul>
                 </body></html>
                 """, format(JOB_1_URL_FORMAT, wiremockBaseUrl), JOB_1_TITLE, JOB_2_RELATIVE_URL, JOB_2_TITLE);
+    }
+
+    public static String htmlWithNestedElementJobs() {
+        return """
+                <html><body>
+                    <div id="id">
+                        <ul>
+                            <li class="class1 class2">
+                                <a href="https://job1.com">jobTitle1</a>
+                            </li>
+                            <li class="class1 class2">
+                                <a href="https://job2.com">jobTitle2</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div>
+                        <ul>
+                            <li>
+                                <a href="https://foo.bar">notAJob</a>
+                            </li>
+                        </ul>
+                    </div>
+                </body></html>
+                """;
+    }
+
+    public static String htmlWithSingleAnchorJob(String jobTitle, String jobHref) {
+        return """
+                <html><body>
+                    <a href="%s">%s</a>
+                </body></html>
+                """.formatted(jobHref, jobTitle);
+    }
+
+    public static String htmlWithSingleAnchorJobAndNoHrefAttribute(String jobTitle) {
+        return """
+                <html><body>
+                    <a>%s</a>
+                </body></html>
+                """.formatted(jobTitle);
+    }
+
+    public static String htmlWithSingleNonAnchorJob(String jobTitle) {
+        return """
+                <html><body>
+                    <span class="class1">%s</span>
+                </body></html>
+                """.formatted(jobTitle);
     }
 
     public static final String UCM_PROFESOR_AYUDANTE_DOCTOR_RESPONSE = """

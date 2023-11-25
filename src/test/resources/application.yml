@@ -91,6 +91,13 @@ sites:
       - type: email
         recipients:
           - job-alert-recipient@localhost
+  - name: JobSite2
+    url: http://localhost:xxx/job-site-2
+    strategy:
+      type: jsRender
+      steps: ul.menu_pag,li,a
+      waitUntil: class=foo
+
 
 email:
   enabled: true
@@ -100,6 +107,10 @@ telegram:
   enabled: true
   baseUrl: http://localhost:xxxx
   botKey: 1234:abcd
+
+selenium:
+  server:
+    url: http://localhost:4444
 
 newrelic:
   enabled: false # OpenTelemetry metrics bridge does not support reading measurements
