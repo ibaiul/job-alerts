@@ -53,7 +53,7 @@ public class JsRenderParsingStrategy implements JobParsingStrategy {
     public Flux<Job> parseJobs(String siteUrl) {
         return Mono.just(webDriverFactory.firefoxRemoteWebDriver())
                 .flatMap(webDriver -> renderPage(webDriver, siteUrl)
-                        .doOnNext(html -> log.debug("SERVUS Rendered HTML response from {}: {}", siteUrl, html))
+                        .doOnNext(html -> log.trace("Rendered HTML response from {}: {}", siteUrl, html))
                         .doFinally(signalType -> webDriver.close()))
                 .flatMapMany(html -> new JsoupJobParser().parseJobs(html, steps, siteUrl));
     }

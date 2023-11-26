@@ -14,7 +14,7 @@ public class WebDriverFactory {
 
     private final String remoteServerUrl;
 
-    public WebDriverFactory(@Value("${selenium.server.url:http://localhost:4444}") String remoteServerUrl) {
+    public WebDriverFactory(@Value("${selenium.server.url}") String remoteServerUrl) {
         this.remoteServerUrl = remoteServerUrl;
     }
 

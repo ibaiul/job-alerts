@@ -25,7 +25,6 @@ public class JsoupJobParser {
                 .map(Jsoup::parse)
                 .map(document -> processQuery(new Elements(document), mainQuery))
                 .flatMap(elements -> Flux.fromArray(secondaryQueries)
-//                        .reduce(elements, Elements::select))
                         .reduce(elements, this::processQuery))
                 .flatMapMany(Flux::fromIterable)
                 .map(jobElement -> toJob(jobElement, siteUrl));

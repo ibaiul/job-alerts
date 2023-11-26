@@ -37,7 +37,7 @@ class JsRenderParsingStrategyTest {
     void should_wait_until_element_with_class_renders() {
         JsRenderParsingStrategy parsingStrategy = new JsRenderParsingStrategy("div,ul,li.foo,a", "class=foo", 5,
                 new WebDriverFactory("http://localhost:" + firefox.getMappedPort(4444)));
-        parsingStrategy.parseJobs("http://wiremock:8080/job-site-2")
+        parsingStrategy.parseJobs("http://wiremock:8080/job-site-1")
                 .as(StepVerifier::create)
                 .expectNext(new Job("jobTitle1", "https://job1.com"))
                 .expectNext(new Job("jobTitle2", "https://job2.com"))

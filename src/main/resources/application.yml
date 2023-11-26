@@ -146,6 +146,10 @@ telegram:
   baseUrl: http://localhost:18080
   botKey: 1234:abcd
 
+selenium:
+  server:
+    url: http://localhost:4444
+
 newrelic:
   enabled: true
   app:
