@@ -97,6 +97,7 @@ sites:
       type: jsRender
       steps: ul.menu_pag,li,a
       waitUntil: class=foo
+      waitSeconds: 10
 
 
 email:

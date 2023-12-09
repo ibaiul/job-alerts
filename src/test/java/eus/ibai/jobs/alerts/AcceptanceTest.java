@@ -137,12 +137,6 @@ public abstract class AcceptanceTest {
         registry.add("sites[1].url", () -> format(NON_EXISTENT_JOB_SITE_URL_FORMAT, wiremock.baseUrl()));
         registry.add("sites[1].strategy.type", () -> "basicHtml");
         registry.add("sites[1].strategy.steps", () -> "a");
-        registry.add("sites[2].name", () -> "JobSite3");
-        registry.add("sites[2].url", () -> "http://job3.com");
-        registry.add("sites[2].strategy.type", () -> "jsRender");
-        registry.add("sites[2].strategy.steps", () -> "a");
-        registry.add("sites[2].strategy.waitUntil", () -> "class=foo");
-        registry.add("sites[2].strategy.waitSeconds", () -> "10");
     }
 
     protected static void stubTelegramGetUpdatesSuccessResponse() {
