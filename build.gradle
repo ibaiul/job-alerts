@@ -37,6 +37,8 @@ dependencies {
     implementation "org.yaml:snakeyaml:2.0"
     // SNYK-JAVA-IOPROJECTREACTORNETTY-6057720
     implementation "io.projectreactor.netty:reactor-netty-http:1.1.13" // Spring Boot 3.1.6/3.2.0 fixes this but makes Snyk fail due to ConcurrentModificationException
+    // SNYK-JAVA-CHQOSLOGBACK-6094942 and 3 other
+    implementation "ch.qos.logback:logback-classic:$logbackVersion"
 
     testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
     testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
@@ -49,7 +51,7 @@ dependencies {
     testImplementation "com.icegreen:greenmail:$greenmailVersion"
     testImplementation "org.testcontainers:postgresql:$testcontainersVersion"
     testImplementation "org.testcontainers:junit-jupiter:$testcontainersVersion"
-    implementation "org.testcontainers:selenium:$testcontainersVersion"
+    testImplementation "org.testcontainers:selenium:$testcontainersVersion"
     testImplementation "io.projectreactor:reactor-test:$reactorVersion"
     testImplementation "io.r2dbc:r2dbc-h2:$h2R2dbcVersion"
     testImplementation "org.wiremock.integrations.testcontainers:wiremock-testcontainers-module:${wiremockTestcontainersVersion}"
