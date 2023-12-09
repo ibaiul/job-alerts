@@ -126,7 +126,7 @@ public class TestData {
     public static String htmlWithNestedElementJobs() {
         return """
                 <html><body>
-                    <div id="id">
+                    <div id="id" customAttr="custom-attr-value">
                         <ul>
                             <li class="class1 class2">
                                 <a href="https://job1.com">jobTitle1</a>

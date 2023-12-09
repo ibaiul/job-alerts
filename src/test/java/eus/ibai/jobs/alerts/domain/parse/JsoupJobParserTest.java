@@ -39,6 +39,32 @@ class JsoupJobParserTest {
     }
 
     @Test
+    void should_parse_jobs_providing_element_attribute_in_steps() {
+        String siteUrl = "https://job-portal.com/jobs/2023";
+        String html = htmlWithNestedElementJobs();
+        String steps = "div[customAttr],ul,li,a";
+
+        parser.parseJobs(html, steps, siteUrl)
+                .as(StepVerifier::create)
+                .expectNext(new Job("jobTitle1", "https://job1.com"))
+                .expectNext(new Job("jobTitle2", "https://job2.com"))
+                .verifyComplete();
+    }
+
+    @Test
+    void should_parse_jobs_providing_element_attribute_and_value_in_steps() {
+        String siteUrl = "https://job-portal.com/jobs/2023";
+        String html = htmlWithNestedElementJobs();
+        String steps = "div[customAttr=custom-attr-value],ul,li,a";
+
+        parser.parseJobs(html, steps, siteUrl)
+                .as(StepVerifier::create)
+                .expectNext(new Job("jobTitle1", "https://job1.com"))
+                .expectNext(new Job("jobTitle2", "https://job2.com"))
+                .verifyComplete();
+    }
+
+    @Test
     void should_parse_jobs_providing_the_minimum_identifiable_steps() {
         String siteUrl = "https://job-portal.com/jobs/2023";
         String html = htmlWithNestedElementJobs();
