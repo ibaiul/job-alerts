@@ -54,7 +54,7 @@ public class JsRenderParsingStrategy implements JobParsingStrategy {
         return Mono.just(webDriverFactory.firefoxRemoteWebDriver())
                 .flatMap(webDriver -> renderPage(webDriver, siteUrl)
                         .doOnNext(html -> log.trace("Rendered HTML response from {}: {}", siteUrl, html))
-                        .doFinally(signalType -> webDriver.close()))
+                        .doFinally(signalType -> webDriver.quit()))
                 .flatMapMany(html -> new JsoupJobParser().parseJobs(html, steps, siteUrl));
     }
 
