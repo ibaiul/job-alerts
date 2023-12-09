@@ -28,8 +28,9 @@ The project is built using a reactive and non-blocking tech stack for scheduling
 
 Jobs are parsed using Jsoup which navigates the DOM and fetches the required elements.
 
-In order to implement a more advanced parsing strategy we can extend the `JobParsingStrategy` class and enable a more sophisticated interaction including clicking or JS support. For that 
-a more specialized tool such as Selenium with a headless browser can be used.
+For the more advanced websites, Selenium is integrated in order to provide JS rendering and interactive actions.
+
+The `JobParsingStrategy` interface can be extended to provide alternate parsing methods.
 
 ### Alerts
 

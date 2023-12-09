@@ -89,7 +89,7 @@ application:
     read-timeout: 10
 
 sites:
-  - name: 'UCM: Profesor Ayudante Doctor'
+  - name: 'Universidad Complutense de Madrid'
     url: https://www.ucm.es/profesor-ayudante-doctor
     strategy:
       type: basicHtml
@@ -101,41 +101,48 @@ sites:
       - type: email
         recipients:
           - job-alert-receiver@localhost
-  - name: 'Carlos III: Postdoctorales'
+  - name: 'Universidad Carlos III'
     url: https://www.uc3m.es/empleo/pdi
     strategy:
       type: basicHtml
       steps: div#list7,a
-  - name: 'UAM: Personal Docente Investigador'
+  - name: 'UAM: Universidad Autónoma de Madrid'
     url: https://www.uam.es/uam/pdi/acceso-plazas-docentes
     strategy:
       type: basicHtml
       steps: a.uam-becas-card
-  - name: 'UAH: Personal Docente Investigador'
+  - name: 'UAH: Universidad de Alcalá de Henares'
     url: https://www.uah.es/es/empleo-publico/PDI/convocatoria/
     strategy:
       type: basicHtml
       steps: ul.main-ul,h4,a
-  - name: 'URJC: Profesor Ayudante Doctor'
+  - name: 'URJC: Universidad rey Juan Carlos'
     url: https://www.urjc.es/empleo-publico#profesor-ayudante-doctor
     strategy:
       type: basicHtml
       steps: div#profesor-ayudante-doctor,a.accordion-toggle
-  - name: 'UCJC: Jobs'
+  - name: 'UCJC: Universidad Camilo José Cela'
     url: https://empleo.sek.es/jobs?department=Universidad+Camilo+José+Cela&location=Madrid,+España+&query=
     strategy:
       type: basicHtml
       steps: li.w-full,a.flex
-  - name: 'UPNA: Personal Docente Investigador'
+  - name: 'UPNA: Universidad Pública de Navarra'
     url: https://sedeelectronica.unavarra.es/sede/tablon-electronico/empleo-publico/convocatorias-pdi?submenu=yes&opcion=1
     strategy:
       type: basicHtml
       steps: ul.listadoActualidad,a
-  - name: 'UNED: Personal Docente Investigador'
+  - name: 'UNED: Universidad Nacional de Educación a distancia'
     url: https://portal.uned.es/portal/page?_pageid=93,671025&_dad=portal&_schema=PORTAL
     strategy:
       type: basicHtml
       steps: h2
+  - name: 'UAX: Universidad Alfonso X el Sabio'
+    url: https://candidatos.uax.es/p/ofertas
+    strategy:
+      type: jsRender
+      steps: a.area
+      waitUntil: title=Portal Web del Candidato - JobSite
+      waitSeconds: 10
 
 email:
   enabled: true
@@ -145,6 +152,10 @@ telegram:
   enabled: true
   baseUrl: http://localhost:18080
   botKey: 1234:abcd
+
+selenium:
+  server:
+    url: http://localhost:4444
 
 newrelic:
   enabled: true

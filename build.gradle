@@ -25,6 +25,7 @@ dependencies {
     runtimeOnly "org.postgresql:r2dbc-postgresql:$postgresqlR2dbcVersion"
     implementation "org.flywaydb:flyway-core:$flywayVersion"
     implementation "org.jsoup:jsoup:$jsoupVersion"
+    implementation "org.seleniumhq.selenium:selenium-java:${seleniumVersion}"
     implementation "io.micrometer:micrometer-core:$micrometerVersion"
     implementation "io.opentelemetry:opentelemetry-sdk:$openTelemetryVersion"
     implementation "io.opentelemetry.instrumentation:opentelemetry-micrometer-1.5:$openTelemetryVersion-alpha"
@@ -32,13 +33,12 @@ dependencies {
     implementation "com.newrelic.telemetry:telemetry-core:$newrelicTelemetryVersion"
     implementation "com.newrelic.telemetry:telemetry-http-okhttp:$newrelicTelemetryVersion"
 
-    // Version fixes for transient dependencies with vulnerabilities
     // SNYK-JAVA-ORGYAML-3152153
     implementation "org.yaml:snakeyaml:2.0"
-    // SNYK-JAVA-COMSQUAREUPOKIO-5773320 -> Waiting for okhttp +4.11.0 to include okio +3.4.0
-    implementation "com.squareup.okio:okio:$okioVersion"
-    // SNYK-JAVA-COMSQUAREUPOKIO-5820002 -> Waiting for okhttp +4.11.0 to include okio-jvm +3.4.0
-    implementation "com.squareup.okio:okio-jvm:$okioVersion"
+    // SNYK-JAVA-IOPROJECTREACTORNETTY-6057720
+    implementation "io.projectreactor.netty:reactor-netty-http:1.1.13" // Spring Boot 3.1.6/3.2.0 fixes this but makes Snyk fail due to ConcurrentModificationException
+    // SNYK-JAVA-CHQOSLOGBACK-6094942 and 3 other
+    implementation "ch.qos.logback:logback-classic:$logbackVersion"
 
     testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
     testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
@@ -50,8 +50,11 @@ dependencies {
     testImplementation "com.github.tomakehurst:wiremock-standalone:$wiremockVersion"
     testImplementation "com.icegreen:greenmail:$greenmailVersion"
     testImplementation "org.testcontainers:postgresql:$testcontainersVersion"
+    testImplementation "org.testcontainers:junit-jupiter:$testcontainersVersion"
+    testImplementation "org.testcontainers:selenium:$testcontainersVersion"
     testImplementation "io.projectreactor:reactor-test:$reactorVersion"
     testImplementation "io.r2dbc:r2dbc-h2:$h2R2dbcVersion"
+    testImplementation "org.wiremock.integrations.testcontainers:wiremock-testcontainers-module:${wiremockTestcontainersVersion}"
 }
 
 springBoot {

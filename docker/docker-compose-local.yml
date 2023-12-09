@@ -11,7 +11,7 @@ services:
       - POSTGRES_PASSWORD=sa
       - POSTGRES_DB=local-db
     ports:
-      - "5432:5432"
+      - "25432:5432"
     volumes:
       - postgres_data:/data/db
     networks:
@@ -22,18 +22,26 @@ services:
     image: ibaiul/greenmail
     pull_policy: always
     ports:
-      - "18081:8080"
+      - "28082:8080"
       - "3025:3025"
     networks:
       - job-alerts-net
 
   wiremock:
     container_name: job-alerts-wiremock
-    image: wiremock/wiremock:2.34.0
+    image: wiremock/wiremock:2.35.0
     ports:
-      - "18080:8080"
+      - "28081:8080"
     volumes:
       - ./wiremock:/home/wiremock
+    networks:
+      - job-alerts-net
+
+  selenium:
+    container_name: job-alerts-selenium
+    image: selenium/standalone-firefox:120.0-geckodriver-0.33.0-grid-4.15.0-20231122
+    ports:
+      - "24444:4444"
     networks:
       - job-alerts-net
 
@@ -42,7 +50,7 @@ services:
     image: ibaiul/job-alerts-local
     env_file: env.conf
     ports:
-      - "8080:8080"
+      - "28080:8080"
     depends_on:
       - db
       - mail
@@ -58,7 +66,7 @@ services:
 #      PGADMIN_DEFAULT_EMAIL: admin@admin.com
 #      PGADMIN_DEFAULT_PASSWORD: password
 #    ports:
-#      - "5050:80"
+#      - "25433:80"
 #    volumes:
 #      - pgadmin_data:/data/pgadmin
 #    depends_on:

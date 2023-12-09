@@ -12,8 +12,7 @@ public final class MetricUtils {
 
     private static final Map<String, AtomicInteger> activeJobsMap = new ConcurrentHashMap<>();
 
-    private MetricUtils() {
-    }
+    private MetricUtils() {}
 
     public static void recordActiveJobs(MeterRegistry meterRegistry, String siteName, int activeJobCount) {
         if (activeJobsMap.containsKey(siteName)) {

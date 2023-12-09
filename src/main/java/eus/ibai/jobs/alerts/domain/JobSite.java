@@ -1,13 +1,13 @@
 package eus.ibai.jobs.alerts.domain;
 
 import eus.ibai.jobs.alerts.domain.parse.JobParsingStrategy;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Slf4j
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class JobSite {
 
     private final String name;
@@ -15,8 +15,6 @@ public class JobSite {
     private final String url;
 
     private final JobParsingStrategy parsingStrategy;
-
-    private final String steps;
 
     public Mono<JobSiteSummary> getSummary() {
         return getJobs()
@@ -34,15 +32,7 @@ public class JobSite {
         return url;
     }
 
-    public String getParsingStrategyType() {
-        return parsingStrategy.getType();
-    }
-
-    public String getParsingStrategySteps() {
-        return steps;
-    }
-
     private Flux<Job> getJobs() {
-        return parsingStrategy.parseJobs(url, steps);
+        return parsingStrategy.parseJobs(url);
     }
 }

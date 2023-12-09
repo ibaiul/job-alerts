@@ -1,7 +1,6 @@
 package eus.ibai.jobs.alerts.application;
 
 import eus.ibai.jobs.alerts.application.JobSiteProperties.JobSiteDefinition;
-import eus.ibai.jobs.alerts.application.JobSiteProperties.JobSiteDefinition.ParsingStrategy;
 import eus.ibai.jobs.alerts.domain.JobSite;
 import eus.ibai.jobs.alerts.domain.alert.JobSiteAlerter;
 import eus.ibai.jobs.alerts.domain.alert.JobSiteAlerterRegistry;
@@ -17,6 +16,8 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.Map;
 
 @Slf4j
 @Component
@@ -68,8 +69,8 @@ public class JobSiteRegistration {
     }
 
     private JobSite toJobSite(JobSiteDefinition jobSiteDefinition) {
-        ParsingStrategy parsingStrategySettings = jobSiteDefinition.strategy();
-        JobParsingStrategy parsingStrategy = jobParsingStrategyFactory.getStrategy(parsingStrategySettings.type());
-        return new JobSite(jobSiteDefinition.name(), jobSiteDefinition.url(), parsingStrategy, parsingStrategySettings.steps());
+        Map<String, Object> parsingStrategySettings = jobSiteDefinition.strategy();
+        JobParsingStrategy parsingStrategy = jobParsingStrategyFactory.getStrategy(parsingStrategySettings);
+        return new JobSite(jobSiteDefinition.name(), jobSiteDefinition.url(), parsingStrategy);
     }
 }

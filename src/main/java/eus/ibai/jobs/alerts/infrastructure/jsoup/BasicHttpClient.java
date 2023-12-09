@@ -6,8 +6,6 @@ import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
 import lombok.extern.slf4j.Slf4j;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
@@ -21,7 +19,7 @@ import reactor.netty.http.client.HttpClient;
 
 @Slf4j
 @Component
-public class JsoupClient {
+public class BasicHttpClient {
 
     private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.102 Safari/537.36";
 
@@ -29,8 +27,8 @@ public class JsoupClient {
 
     private final WebClient webClient;
 
-    public JsoupClient(@Value("${application.site.connect-timeout}") int connectTimeout, @Value("${application.site.read-timeout}") int readTimeout,
-                       ObservationRegistry observationRegistry) {
+    public BasicHttpClient(@Value("${application.site.connect-timeout}") int connectTimeout, @Value("${application.site.read-timeout}") int readTimeout,
+                           ObservationRegistry observationRegistry) {
         webClient = WebClient.builder()
                 .defaultHeader(HttpHeaders.USER_AGENT, USER_AGENT)
                 .clientConnector(new ReactorClientHttpConnector(HttpClient.create()
@@ -48,14 +46,13 @@ public class JsoupClient {
                 .build();
     }
 
-    public Mono<Document> parse(String siteUrl) {
+    public Mono<String> parse(String siteUrl) {
         log.trace("Retrieving DOM from {}", siteUrl);
         return webClient.get()
                 .uri(siteUrl)
                 .exchangeToMono(clientResponse -> parseResponse(clientResponse, siteUrl))
                 .onErrorMap(error -> error instanceof ParsingException ? error : new ParsingException(error))
-                .switchIfEmpty(Mono.error(new ParsingException("Could not retrieve jobs from site " + siteUrl)))
-                .map(Jsoup::parse);
+                .switchIfEmpty(Mono.error(new ParsingException("Could not retrieve jobs from site " + siteUrl)));
     }
 
     private Mono<String> parseResponse(ClientResponse httpResponse, String siteUrl) {

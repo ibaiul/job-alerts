@@ -15,25 +15,25 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.nullValue;
 
-class JsoupClientTest extends AcceptanceTest {
+class BasicHttpClientTest extends AcceptanceTest {
 
     @Autowired
-    private JsoupClient jsoupClient;
+    private BasicHttpClient basicHttpClient;
 
     @Value("${application.site.read-timeout}")
     private int readTimeout;
 
     @Test
     void should_retrieve_dom_when_job_site_exists() {
-        StepVerifier.create(jsoupClient.parse(format(JOB_SITE_1_URL_FORMAT, wiremockBaseUrl())))
-                .expectNextMatches(document -> !document.select("ul.menu_pag").isEmpty())
+        StepVerifier.create(basicHttpClient.parse(format(JOB_SITE_1_URL_FORMAT, wiremockBaseUrl())))
+                .expectNextMatches(html -> html.contains("<ul class=\"menu_pag\">"))
                 .verifyComplete();
         verifyJobSiteRequestMetricRecorded(JOB_SITE_1_PATH, 200, 1L);
     }
 
     @Test
     void should_throw_exception_when_job_site_cannot_be_reached() {
-        StepVerifier.create(jsoupClient.parse(format(NON_EXISTENT_JOB_SITE_URL_FORMAT, wiremockBaseUrl())))
+        StepVerifier.create(basicHttpClient.parse(format(NON_EXISTENT_JOB_SITE_URL_FORMAT, wiremockBaseUrl())))
                 .expectNextCount(0)
                 .verifyErrorSatisfies(error -> {
                     assertThat(error, instanceOf(ParsingException.class));
@@ -44,7 +44,7 @@ class JsoupClientTest extends AcceptanceTest {
 
     @Test
     void should_map_exception_when_unexpected_error_occurs() {
-        StepVerifier.create(jsoupClient.parse("http://localhost:65536/port-out-of-range"))
+        StepVerifier.create(basicHttpClient.parse("http://localhost:65536/port-out-of-range"))
                 .expectNextCount(0)
                 .verifyErrorSatisfies(error -> {
                     assertThat(error, instanceOf(ParsingException.class));
@@ -57,7 +57,7 @@ class JsoupClientTest extends AcceptanceTest {
         int delay = (readTimeout + 1) * 1000;
         stubSlowJobSite(delay);
 
-        StepVerifier.create(jsoupClient.parse(format(JOB_SITE_TIMEOUT_URL_FORMAT, wiremockBaseUrl())))
+        StepVerifier.create(basicHttpClient.parse(format(JOB_SITE_TIMEOUT_URL_FORMAT, wiremockBaseUrl())))
                 .expectNextCount(0)
                 .verifyErrorSatisfies(error -> {
                     assertThat(error, instanceOf(ParsingException.class));

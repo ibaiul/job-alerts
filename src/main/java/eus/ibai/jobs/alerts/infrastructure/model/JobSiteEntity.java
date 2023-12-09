@@ -15,8 +15,8 @@ public class JobSiteEntity {
 
     @Id
     private Long id;
+
     private String name;
+
     private String url;
-    private String parsingStrategyType;
-    private String parsingStrategySteps;
 }

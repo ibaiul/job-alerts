@@ -23,13 +23,13 @@ class JobSiteTest {
 
     @BeforeEach
     void beforeEach() {
-        jobSite = new JobSite("siteName", "siteUrl", jobParsingStrategy, "jpSteps");
+        jobSite = new JobSite("siteName", "siteUrl", jobParsingStrategy);
     }
 
     @Test
     void should_return_job_summary() {
         List<Job> expectedJobs = List.of(new Job("jobTitle", "jobUrl"));
-        when(jobParsingStrategy.parseJobs(jobSite.getUrl(), jobSite.getParsingStrategySteps())).thenReturn(Flux.fromIterable(expectedJobs));
+        when(jobParsingStrategy.parseJobs(jobSite.getUrl())).thenReturn(Flux.fromIterable(expectedJobs));
         JobSiteSummary expectedSummary = new JobSiteSummary(jobSite.getName(), jobSite.getUrl(), expectedJobs);
 
         StepVerifier.create(jobSite.getSummary())
@@ -43,7 +43,7 @@ class JobSiteTest {
         Job job = new Job(jobTitle, "jobUrl1");
         Job duplicatedJob = new Job(jobTitle, "jobUrl2");
         List<Job> jobs = List.of(job, duplicatedJob);
-        when(jobParsingStrategy.parseJobs(jobSite.getUrl(), jobSite.getParsingStrategySteps())).thenReturn(Flux.fromIterable(jobs));
+        when(jobParsingStrategy.parseJobs(jobSite.getUrl())).thenReturn(Flux.fromIterable(jobs));
         List<Job> expectedJobs = List.of(job);
         JobSiteSummary expectedSummary = new JobSiteSummary(jobSite.getName(), jobSite.getUrl(), expectedJobs);
 
