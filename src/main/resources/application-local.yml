@@ -10,6 +10,11 @@ spring:
 telegram:
   baseUrl: http://wiremock:8080
 
+selenium:
+  server:
+    url: http://selenium:4444
+
 newrelic:
+  enabled: false
   metrics:
     ingest-uri: http://wiremock:8080/metric/v1
