@@ -3,6 +3,7 @@ package eus.ibai.jobs.alerts.infrastructure.telegram;
 import io.micrometer.common.KeyValue;
 import org.springframework.web.reactive.function.client.ClientHttpObservationDocumentation.HighCardinalityKeyNames;
 import org.springframework.web.reactive.function.client.ClientHttpObservationDocumentation.LowCardinalityKeyNames;
+import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ClientRequestObservationContext;
 import org.springframework.web.reactive.function.client.DefaultClientRequestObservationConvention;
 
@@ -27,8 +28,9 @@ public class TelegramClientRequestObservationConvention extends DefaultClientReq
 
     @Override
     protected KeyValue httpUrl(ClientRequestObservationContext context) {
-        if (context.getRequest() != null) {
-            return KeyValue.of(HighCardinalityKeyNames.HTTP_URL, extractPathWithoutBotToken(context.getRequest().url().toASCIIString()));
+        ClientRequest request = context.getRequest();
+        if (request != null) {
+            return KeyValue.of(HighCardinalityKeyNames.HTTP_URL, extractPathWithoutBotToken(request.url().toASCIIString()));
         }
         return KeyValue.of(HighCardinalityKeyNames.HTTP_URL, KeyValue.NONE_VALUE);
     }

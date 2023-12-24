@@ -11,6 +11,7 @@
     </root>
 
     <logger name="eus.ibai.jobs.alerts" level="DEBUG"/>
+    <logger name="eus.ibai.jobs.alerts.domain.parse.JsRenderParsingStrategy" level="INFO"/>
     <logger name="org.springframework" level="INFO"/>
     <logger name="io.r2dbc.postgresql.PARAM" level="INFO"/>
     <logger name="io.r2dbc.postgresql.QUERY" level="INFO"/>

@@ -6,8 +6,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 
+import static lombok.AccessLevel.PROTECTED;
+
 @Slf4j
-@RequiredArgsConstructor
+@RequiredArgsConstructor(access = PROTECTED)
 public class BasicHtmlParsingStrategy implements JobParsingStrategy {
 
     public static final String TYPE = "basicHtml";
