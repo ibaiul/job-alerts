@@ -47,7 +47,7 @@ public class JsRenderParsingStrategy implements JobParsingStrategy {
     public Flux<Job> parseJobs(String siteUrl) {
         return Mono.just(webDriverFactory.firefoxRemoteWebDriver())
                 .flatMap(webDriver -> renderPage(webDriver, siteUrl)
-                        .doOnNext(html -> log.info("Rendered HTML response from {}: {}", siteUrl, html))
+                        .doOnNext(html -> log.trace("Rendered HTML response from {}: {}", siteUrl, html))
                         .timeout(Duration.ofSeconds(waitSeconds))
                         .doFinally(signalType -> webDriver.quit()))
                 .flatMapMany(html -> new JsoupJobParser().parseJobs(html, parsingSteps, siteUrl));
@@ -137,19 +137,16 @@ public class JsRenderParsingStrategy implements JobParsingStrategy {
                     if (matcher.matches()) {
                         yield new JsStep(jsAction, JsElementType.valueOf(matcher.group(1).toUpperCase()), matcher.group(2));
                     }
-                    yield null;
+                    throw new IllegalArgumentException("Malformed LOAD step: %s".formatted(initialStep));
                 }
                 case CLICK -> {
                     Matcher matcher = STEP_CLICK_PATTERN.matcher(initialStep);
                     if (matcher.matches()) {
                         yield new JsStep(jsAction, JsElementType.valueOf(matcher.group(1).toUpperCase()), matcher.group(2), matcher.group(3));
                     }
-                    yield null;
+                    throw new IllegalArgumentException("Malformed CLICK step: %s".formatted(initialStep));
                 }
             };
-            if (jsStep == null) {
-                throw new IllegalArgumentException("Could not parse step: " + initialStep);
-            }
             jsSteps.add(jsStep);
         });
         return jsSteps;

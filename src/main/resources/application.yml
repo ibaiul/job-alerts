@@ -140,8 +140,9 @@ sites:
     url: https://candidatos.uax.es/p/ofertas
     strategy:
       type: jsRender
+      initialSteps:
+        - load:title=Portal Web del Candidato - JobSite
       steps: a.area
-      waitUntil: title=Portal Web del Candidato - JobSite
       waitSeconds: 10
 
 email:

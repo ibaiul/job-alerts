@@ -95,8 +95,9 @@ sites:
     url: http://localhost:xxx/job-site-2
     strategy:
       type: jsRender
+      initialSteps:
+        - load:class=foo
       steps: ul.menu_pag,li,a
-      waitUntil: class=foo
       waitSeconds: 10
 
 
