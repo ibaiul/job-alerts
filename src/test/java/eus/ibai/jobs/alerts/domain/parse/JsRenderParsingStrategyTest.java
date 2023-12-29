@@ -2,6 +2,7 @@ package eus.ibai.jobs.alerts.domain.parse;
 
 import eus.ibai.jobs.alerts.domain.Job;
 import eus.ibai.jobs.alerts.infrastructure.selenium.WebDriverFactory;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.firefox.FirefoxOptions;
@@ -40,8 +41,9 @@ class JsRenderParsingStrategyTest {
     @Test
     void should_wait_until_element_with_class_renders() {
         List<String> initialSteps = List.of("load:class=dynamic-class");
-        JsRenderParsingStrategy parsingStrategy = new JsRenderParsingStrategy(initialSteps, "div,ul,li.job-item,a", 5,
+        JsRenderParsingStrategy parsingStrategy = new JsRenderParsingStrategy(initialSteps, "div,ul,li.job-item,a", 2, 5,
                 new WebDriverFactory("http://localhost:" + firefox.getMappedPort(4444)));
+
         parsingStrategy.parseJobs("http://wiremock:8080/job-site-1")
                 .as(StepVerifier::create)
                 .expectNext(new Job("jobTitle1", "https://job1.com"))
@@ -52,8 +54,9 @@ class JsRenderParsingStrategyTest {
     @Test
     void should_wait_until_element_with_id_renders() {
         List<String> initialSteps = List.of("load:id=dynamic-id");
-        JsRenderParsingStrategy parsingStrategy = new JsRenderParsingStrategy(initialSteps, "div,ul,li.job-item,a", 2,
+        JsRenderParsingStrategy parsingStrategy = new JsRenderParsingStrategy(initialSteps, "div,ul,li.job-item,a", 2, 5,
                 new WebDriverFactory("http://localhost:" + firefox.getMappedPort(4444)));
+
         parsingStrategy.parseJobs(JOB_SITE_URL_FORMAT.formatted(wiremockServer.getNetworkAliases().get(0)))
                 .as(StepVerifier::create)
                 .expectNext(new Job("jobTitle1", "https://job1.com"))
@@ -64,8 +67,9 @@ class JsRenderParsingStrategyTest {
     @Test
     void should_wait_until_title_renders() {
         List<String> initialSteps = List.of("load:title=Dynamic Title");
-        JsRenderParsingStrategy parsingStrategy = new JsRenderParsingStrategy(initialSteps, "div,ul,li.job-item,a", 2,
+        JsRenderParsingStrategy parsingStrategy = new JsRenderParsingStrategy(initialSteps, "div,ul,li.job-item,a", 2, 5,
                 new WebDriverFactory("http://localhost:" + firefox.getMappedPort(4444)));
+
         parsingStrategy.parseJobs(JOB_SITE_URL_FORMAT.formatted(wiremockServer.getNetworkAliases().get(0)))
                 .as(StepVerifier::create)
                 .expectNext(new Job("jobTitle1", "https://job1.com"))
@@ -76,8 +80,9 @@ class JsRenderParsingStrategyTest {
     @Test
     void should_apply_initial_steps() {
         List<String> initialSteps = List.of("click:id=menu-item", "click:class=filter-item[0,1]","load:class=dynamic-job-item");
-        JsRenderParsingStrategy parsingStrategy = new JsRenderParsingStrategy(initialSteps, "div#dynamic-id,ul,li.job-item,a", 5,
+        JsRenderParsingStrategy parsingStrategy = new JsRenderParsingStrategy(initialSteps, "div#dynamic-id,ul,li.job-item,a", 3, 10,
                 new WebDriverFactory("http://localhost:" + firefox.getMappedPort(4444)));
+
         parsingStrategy.parseJobs(JOB_SITE_URL_FORMAT.formatted(wiremockServer.getNetworkAliases().get(0)))
                 .as(StepVerifier::create)
                 .expectNext(new Job("jobTitle1", "https://job1.com"))
@@ -89,8 +94,9 @@ class JsRenderParsingStrategyTest {
     void should_apply_initial_step_wait() {
         int stepWaitSeconds = 3;
         List<String> initialSteps = List.of("wait:%s".formatted(stepWaitSeconds));
-        JsRenderParsingStrategy parsingStrategy = new JsRenderParsingStrategy(initialSteps, "div#dynamic-id,ul,li.job-item,a", 5,
+        JsRenderParsingStrategy parsingStrategy = new JsRenderParsingStrategy(initialSteps, "div#dynamic-id,ul,li.job-item,a", 5, 10,
                 new WebDriverFactory("http://localhost:" + firefox.getMappedPort(4444)));
+
         Duration parsingDuration = parsingStrategy.parseJobs(JOB_SITE_URL_FORMAT.formatted(wiremockServer.getNetworkAliases().get(0)))
                 .as(StepVerifier::create)
                 .expectNext(new Job("jobTitle1", "https://job1.com"))
@@ -100,21 +106,41 @@ class JsRenderParsingStrategyTest {
     }
 
     @Test
-    void should_timeout_when_wait_until_condition_is_not_met() {
+    void should_timeout_when_step_condition_is_not_met_in_time() {
         List<String> initialSteps = List.of("load:class=nonExistingClass");
-        JsRenderParsingStrategy parsingStrategy = new JsRenderParsingStrategy(initialSteps, "div,ul,li.foo,a", 1,
+        int stepTimeout = 3;
+        int parseTimeout = 10;
+        JsRenderParsingStrategy parsingStrategy = new JsRenderParsingStrategy(initialSteps, "div,ul,li.foo,a", stepTimeout, parseTimeout,
                 new WebDriverFactory("http://localhost:" + firefox.getMappedPort(4444)));
-        parsingStrategy.parseJobs(JOB_SITE_URL_FORMAT.formatted(wiremockServer.getNetworkAliases().get(0)))
+
+        Duration parsingDuration = parsingStrategy.parseJobs(JOB_SITE_URL_FORMAT.formatted(wiremockServer.getNetworkAliases().get(0)))
                 .as(StepVerifier::create)
                 .expectError(TimeoutException.class)
                 .verify();
+        assertThat(parsingDuration).isGreaterThanOrEqualTo(Duration.ofSeconds(stepTimeout)).isLessThan(Duration.ofSeconds(parseTimeout));
+    }
+
+    @Test
+    @Disabled("Enable when moving to JDK 21 and sleeping virtual threads")
+    void should_timeout_when_parsing_is_not_finished_in_time() {
+        List<String> initialSteps = List.of("load:class=nonExistingClass");
+        int stepTimeout = 10;
+        int parseTimeout = 3;
+        JsRenderParsingStrategy parsingStrategy = new JsRenderParsingStrategy(initialSteps, "div,ul,li.foo,a", stepTimeout, parseTimeout,
+                new WebDriverFactory("http://localhost:" + firefox.getMappedPort(4444)));
+
+        Duration parsingDuration = parsingStrategy.parseJobs(JOB_SITE_URL_FORMAT.formatted(wiremockServer.getNetworkAliases().get(0)))
+                .as(StepVerifier::create)
+                .expectError(TimeoutException.class)
+                .verify();
+        assertThat(parsingDuration).isGreaterThanOrEqualTo(Duration.ofSeconds(parseTimeout)).isLessThan(Duration.ofSeconds(stepTimeout));
     }
 
     @Test
     void should_fail_when_wait_until_condition_is_malformed() {
         assertThrowsExactly(IllegalArgumentException.class, () -> {
             List<String> initialSteps = List.of("foo=bar");
-            new JsRenderParsingStrategy(initialSteps, "div,ul,li.foo,a", 2, new WebDriverFactory("http://localhost:" + firefox.getMappedPort(4444)));
+            new JsRenderParsingStrategy(initialSteps, "div,ul,li.foo,a", 1, 2, new WebDriverFactory("http://localhost:" + firefox.getMappedPort(4444)));
         });
     }
 

@@ -27,8 +27,9 @@ public class JobParsingStrategyFactory {
                 List<String> initialSteps = Optional.ofNullable(parsingStrategyDefinition.get("initialSteps"))
                         .map(o -> ((Map<String, String>) o).values().stream().toList())
                         .orElse(Collections.emptyList());
-                int waitSeconds = (int) parsingStrategyDefinition.getOrDefault("waitSeconds", 5);
-                yield new JsRenderParsingStrategy(initialSteps, steps, waitSeconds, webDriverFactory);
+                int stepTimeout = (int) parsingStrategyDefinition.getOrDefault("stepTimeout", 3);
+                int parseTimeout = (int) parsingStrategyDefinition.getOrDefault("parseTimeout", 10);
+                yield new JsRenderParsingStrategy(initialSteps, steps, stepTimeout, parseTimeout, webDriverFactory);
             }
             default -> throw new IllegalArgumentException("Unknown parsing strategy " + type);
         };

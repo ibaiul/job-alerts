@@ -27,7 +27,7 @@ class JobParsingStrategyFactoryTest {
     private WebDriverFactory webDriverFactory;
 
     @InjectMocks
-    JobParsingStrategyFactory parsingStrategyFactory;
+    private JobParsingStrategyFactory parsingStrategyFactory;
 
     @Test
     void should_create_basic_html_parsing_strategy() {
@@ -40,7 +40,7 @@ class JobParsingStrategyFactoryTest {
 
     @Test
     void should_create_js_render_parsing_strategy() {
-        Map<String, Object> parsingStrategySettings = Map.of("type", "jsRender", "initialSteps", initialSteps(List.of("load:class=foo")), "steps", "steps", "waitSeconds", 2);
+        Map<String, Object> parsingStrategySettings = Map.of("type", "jsRender", "initialSteps", initialSteps(List.of("load:class=foo")), "steps", "steps", "stepTimeout", 2, "parseTimeout", 5);
 
         JobParsingStrategy jobParsingStrategy = parsingStrategyFactory.getStrategy(parsingStrategySettings);
 

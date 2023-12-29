@@ -98,7 +98,8 @@ sites:
       initialSteps:
         - load:class=foo
       steps: ul.menu_pag,li,a
-      waitSeconds: 10
+      stepTimeout: 2
+      parseTimeout: 5
 
 
 email:

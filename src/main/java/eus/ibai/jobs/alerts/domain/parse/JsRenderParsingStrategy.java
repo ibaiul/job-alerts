@@ -35,14 +35,17 @@ public class JsRenderParsingStrategy implements JobParsingStrategy {
 
     private final String parsingSteps;
 
-    private final int waitSeconds;
+    private final int stepTimeout;
+
+    private final int parseTimeout;
 
     private final WebDriverFactory webDriverFactory;
 
-    JsRenderParsingStrategy(List<String> initialSteps, String parsingSteps, int waitSeconds, WebDriverFactory webDriverFactory) {
+    JsRenderParsingStrategy(List<String> initialSteps, String parsingSteps, int stepTimeout, int parseTimeout, WebDriverFactory webDriverFactory) {
         this.initialSteps = parseSteps(initialSteps);
         this.parsingSteps = parsingSteps;
-        this.waitSeconds = waitSeconds;
+        this.stepTimeout = stepTimeout;
+        this.parseTimeout = parseTimeout;
         this.webDriverFactory = webDriverFactory;
     }
 
@@ -52,7 +55,7 @@ public class JsRenderParsingStrategy implements JobParsingStrategy {
                 .subscribeOn(Schedulers.boundedElastic())
                 .flatMap(webDriver -> renderPage(webDriver, siteUrl)
                         .doOnNext(html -> log.trace("Rendered HTML response from {}: {}", siteUrl, html))
-                        .timeout(Duration.ofSeconds(waitSeconds))
+                        .timeout(Duration.ofSeconds(parseTimeout))
                         .doFinally(signalType -> webDriver.quit()))
                 .publishOn(Schedulers.parallel())
                 .flatMapMany(html -> new JsoupJobParser().parseJobs(html, parsingSteps, siteUrl));
@@ -110,7 +113,7 @@ public class JsRenderParsingStrategy implements JobParsingStrategy {
         executor.executeScript("arguments[0].scrollIntoView(true);", element); // scrollToElement does not seem to work with Firefox
 
         FluentWait<WebElement> fluentWait = new FluentWait<>(element);
-        fluentWait.withTimeout(Duration.ofSeconds(waitSeconds));
+        fluentWait.withTimeout(Duration.ofSeconds(stepTimeout));
         fluentWait.until(elem -> {
             try {
                 new Actions(webDriver)
@@ -133,7 +136,7 @@ public class JsRenderParsingStrategy implements JobParsingStrategy {
             case TITLE -> ExpectedConditions.titleContains(elementValue);
         };
 
-        WebDriverWait wait = new WebDriverWait(webDriver, Duration.ofSeconds(waitSeconds));
+        WebDriverWait wait = new WebDriverWait(webDriver, Duration.ofSeconds(stepTimeout));
         wait.until(expectedCondition);
     }
 

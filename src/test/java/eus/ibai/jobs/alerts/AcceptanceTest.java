@@ -145,7 +145,8 @@ public abstract class AcceptanceTest {
         registry.add("sites[2].strategy.initialSteps[2]", () -> "load:class=dynamic-job-item");
         registry.add("sites[2].strategy.initialSteps[3]", () -> "wait:1");
         registry.add("sites[2].strategy.steps", () -> "div#dynamic-id,ul,li.job-item,a");
-        registry.add("sites[2].strategy.waitSeconds", () -> 10);
+        registry.add("sites[2].strategy.stepTimeout", () -> 2);
+        registry.add("sites[2].strategy.parseTimeout", () -> 5);
     }
 
     protected static void stubTelegramGetUpdatesSuccessResponse() {
