@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.Map;
 
+import static eus.ibai.jobs.alerts.TestData.initialSteps;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -39,7 +40,7 @@ class JobParsingStrategyFactoryTest {
 
     @Test
     void should_create_js_render_parsing_strategy() {
-        Map<String, Object> parsingStrategySettings = Map.of("type", "jsRender", "initialSteps", List.of("load:class=foo"), "steps", "steps", "waitSeconds", 2);
+        Map<String, Object> parsingStrategySettings = Map.of("type", "jsRender", "initialSteps", initialSteps(List.of("load:class=foo")), "steps", "steps", "waitSeconds", 2);
 
         JobParsingStrategy jobParsingStrategy = parsingStrategyFactory.getStrategy(parsingStrategySettings);
 
@@ -57,7 +58,7 @@ class JobParsingStrategyFactoryTest {
     @ParameterizedTest
     @ValueSource(strings = {"invalid", "wait:class=foo", "load:attr=foo", "click:attr=foo"})
     void should_fail_to_create_js_render_parsing_strategy_when_initial_steps_are_invalid(String initialSteps) {
-        Map<String, Object> parsingStrategySettings = Map.of("type", "jsRender", "initialSteps", List.of(initialSteps), "steps", "steps");
+        Map<String, Object> parsingStrategySettings = Map.of("type", "jsRender", "initialSteps", initialSteps(List.of(initialSteps)), "steps", "steps");
 
         assertThrows(IllegalArgumentException.class, () -> parsingStrategyFactory.getStrategy(parsingStrategySettings));
     }

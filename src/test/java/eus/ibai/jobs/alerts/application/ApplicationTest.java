@@ -24,7 +24,8 @@ class ApplicationTest extends AcceptanceTest {
 
         assertThat(siteAlerters, containsInAnyOrder(
                 hasProperty("siteName", equalTo(JOB_SITE_1_NAME)),
-                hasProperty("siteName", equalTo(JOB_SITE_2_NAME))
+                hasProperty("siteName", equalTo(JOB_SITE_2_NAME)),
+                hasProperty("siteName", equalTo(JOB_SITE_1_NAME + "-js"))
         ));
     }
 }

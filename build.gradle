@@ -40,7 +40,7 @@ dependencies {
     testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
     testImplementation "org.springframework.boot:spring-boot-starter-test:$springBootVersion"
     testImplementation "org.awaitility:awaitility:$awaitilityVersion"
-    testImplementation "com.github.tomakehurst:wiremock-standalone:$wiremockVersion"
+    testImplementation "org.wiremock:wiremock-standalone:$wiremockVersion"
     testImplementation "com.icegreen:greenmail:$greenmailVersion"
     testImplementation "org.testcontainers:postgresql:$testcontainersVersion"
     testImplementation "org.testcontainers:junit-jupiter:$testcontainersVersion"

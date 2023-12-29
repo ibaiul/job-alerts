@@ -12,8 +12,10 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
 import reactor.test.StepVerifier;
 
+import java.time.Duration;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 @Testcontainers
@@ -81,6 +83,20 @@ class JsRenderParsingStrategyTest {
                 .expectNext(new Job("jobTitle1", "https://job1.com"))
                 .expectNext(new Job("jobTitle3", "https://job3.com"))
                 .verifyComplete();
+    }
+
+    @Test
+    void should_apply_initial_step_wait() {
+        int stepWaitSeconds = 3;
+        List<String> initialSteps = List.of("wait:%s".formatted(stepWaitSeconds));
+        JsRenderParsingStrategy parsingStrategy = new JsRenderParsingStrategy(initialSteps, "div#dynamic-id,ul,li.job-item,a", 5,
+                new WebDriverFactory("http://localhost:" + firefox.getMappedPort(4444)));
+        Duration parsingDuration = parsingStrategy.parseJobs(JOB_SITE_URL_FORMAT.formatted(wiremockServer.getNetworkAliases().get(0)))
+                .as(StepVerifier::create)
+                .expectNext(new Job("jobTitle1", "https://job1.com"))
+                .expectNext(new Job("jobTitle2", "https://job2.com"))
+                .verifyComplete();
+        assertThat(parsingDuration).isGreaterThanOrEqualTo(Duration.ofSeconds(stepWaitSeconds));
     }
 
     @Test

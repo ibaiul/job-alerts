@@ -25,7 +25,7 @@ public class JobParsingStrategyFactory {
             case BasicHtmlParsingStrategy.TYPE -> new BasicHtmlParsingStrategy(steps, basicHttpClient, new JsoupJobParser());
             case JsRenderParsingStrategy.TYPE -> {
                 List<String> initialSteps = Optional.ofNullable(parsingStrategyDefinition.get("initialSteps"))
-                        .map(o -> (List<String>) o)
+                        .map(o -> ((Map<String, String>) o).values().stream().toList())
                         .orElse(Collections.emptyList());
                 int waitSeconds = (int) parsingStrategyDefinition.getOrDefault("waitSeconds", 5);
                 yield new JsRenderParsingStrategy(initialSteps, steps, waitSeconds, webDriverFactory);

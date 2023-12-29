@@ -6,6 +6,7 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.remote.http.ClientConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 
@@ -18,7 +19,7 @@ public class WebDriverFactory {
         this.remoteServerUrl = remoteServerUrl;
     }
 
-    public WebDriver firefoxRemoteWebDriver() {
+    public Mono<WebDriver> firefoxRemoteWebDriver() {
         FirefoxOptions firefoxOptions = new FirefoxOptions();
         firefoxOptions.addArguments("--headless");
         firefoxOptions.addArguments("--no-sandbox");
@@ -28,10 +29,10 @@ public class WebDriverFactory {
                 .connectionTimeout(Duration.ofMinutes(20))
                 .readTimeout(Duration.ofMinutes(20));
 
-        return RemoteWebDriver.builder()
+        return Mono.fromCallable(() -> RemoteWebDriver.builder()
                 .oneOf(firefoxOptions)
                 .address(remoteServerUrl)
                 .config(config)
-                .build();
+                .build());
     }
 }

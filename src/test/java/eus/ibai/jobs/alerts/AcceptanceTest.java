@@ -137,6 +137,15 @@ public abstract class AcceptanceTest {
         registry.add("sites[1].url", () -> format(NON_EXISTENT_JOB_SITE_URL_FORMAT, wiremock.baseUrl()));
         registry.add("sites[1].strategy.type", () -> "basicHtml");
         registry.add("sites[1].strategy.steps", () -> "a");
+        registry.add("sites[2].name", () -> JOB_SITE_1_NAME + "-js");
+        registry.add("sites[2].url", () -> format(JOB_SITE_1_URL_FORMAT, wiremock.baseUrl()));
+        registry.add("sites[2].strategy.type", () -> "jsRender");
+        registry.add("sites[2].strategy.initialSteps[0]", () -> "click:id=menu-item");
+        registry.add("sites[2].strategy.initialSteps[1]", () -> "click:class=filter-item[0,1]");
+        registry.add("sites[2].strategy.initialSteps[2]", () -> "load:class=dynamic-job-item");
+        registry.add("sites[2].strategy.initialSteps[3]", () -> "wait:1");
+        registry.add("sites[2].strategy.steps", () -> "div#dynamic-id,ul,li.job-item,a");
+        registry.add("sites[2].strategy.waitSeconds", () -> 10);
     }
 
     protected static void stubTelegramGetUpdatesSuccessResponse() {

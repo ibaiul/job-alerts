@@ -11,6 +11,7 @@ import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -23,6 +24,8 @@ import java.util.stream.Stream;
 public class JsRenderParsingStrategy implements JobParsingStrategy {
 
     public static final String TYPE = "jsRender";
+
+    private static final Pattern STEP_WAIT_PATTERN = Pattern.compile("wait:(\\d+)");
 
     private static final Pattern STEP_LOAD_PATTERN = Pattern.compile("load:(id|class|title)=([a-zA-Z0-9_\\- ]+)");
 
@@ -45,11 +48,13 @@ public class JsRenderParsingStrategy implements JobParsingStrategy {
 
     @Override
     public Flux<Job> parseJobs(String siteUrl) {
-        return Mono.just(webDriverFactory.firefoxRemoteWebDriver())
+        return webDriverFactory.firefoxRemoteWebDriver()
+                .subscribeOn(Schedulers.boundedElastic())
                 .flatMap(webDriver -> renderPage(webDriver, siteUrl)
                         .doOnNext(html -> log.trace("Rendered HTML response from {}: {}", siteUrl, html))
                         .timeout(Duration.ofSeconds(waitSeconds))
                         .doFinally(signalType -> webDriver.quit()))
+                .publishOn(Schedulers.parallel())
                 .flatMapMany(html -> new JsoupJobParser().parseJobs(html, parsingSteps, siteUrl));
     }
 
@@ -64,9 +69,22 @@ public class JsRenderParsingStrategy implements JobParsingStrategy {
     }
 
     private void applyStep(WebDriver webDriver, JsStep step) {
-        waitUntil(webDriver, step.elementType(), step.elementValue());
-        if (step.action() == JsAction.CLICK) {
-            click(webDriver, step.elementType(), step.elementValue(), step.extra());
+        JsAction action = step.action();
+        switch (action) {
+            case WAIT -> {
+                int wait = Integer.parseInt(step.extra()) * 1000;
+                try {
+                    Thread.sleep(wait);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new IllegalStateException("Failed to apply wait step.");
+                }
+            }
+            case LOAD -> waitUntil(webDriver, step.elementType(), step.elementValue());
+            case CLICK -> {
+                waitUntil(webDriver, step.elementType(), step.elementValue());
+                click(webDriver, step.elementType(), step.elementValue(), step.extra());
+            }
         }
     }
 
@@ -93,7 +111,7 @@ public class JsRenderParsingStrategy implements JobParsingStrategy {
 
         FluentWait<WebElement> fluentWait = new FluentWait<>(element);
         fluentWait.withTimeout(Duration.ofSeconds(waitSeconds));
-        boolean clickSucceeded = fluentWait.until(elem -> {
+        fluentWait.until(elem -> {
             try {
                 new Actions(webDriver)
                         .moveToElement(elem)
@@ -106,10 +124,6 @@ public class JsRenderParsingStrategy implements JobParsingStrategy {
 
             return true;
         });
-
-        if (!clickSucceeded) {
-            throw new IllegalStateException("Failed to click element %s".formatted(element));
-        }
     }
 
     private void waitUntil(WebDriver webDriver, JsElementType elementType, String elementValue) {
@@ -132,6 +146,13 @@ public class JsRenderParsingStrategy implements JobParsingStrategy {
         initialSteps.forEach(initialStep -> {
             JsAction jsAction = JsAction.valueOf(initialStep.split(":")[0].toUpperCase());
             JsStep jsStep = switch (jsAction) {
+                case WAIT -> {
+                    Matcher matcher = STEP_WAIT_PATTERN.matcher(initialStep);
+                    if (matcher.matches()) {
+                        yield new JsStep(jsAction, null, null, matcher.group(1));
+                    }
+                    throw new IllegalArgumentException("Malformed WAIT step: %s".formatted(initialStep));
+                }
                 case LOAD -> {
                     Matcher matcher = STEP_LOAD_PATTERN.matcher(initialStep);
                     if (matcher.matches()) {
