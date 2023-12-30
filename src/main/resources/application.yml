@@ -144,6 +144,40 @@ sites:
         - load:title=Portal Web del Candidato - JobSite
       steps: a.area
       waitSeconds: 10
+  - name: 'Universidad de Deusto'
+    url: https://www.deusto.es/es/inicio/somos-deusto/equipo/trabaja-deusto
+    strategy:
+      type: jsRender
+      initialSteps:
+        - load:class=MuiSelect-nativeInput
+        - click:class=MuiInput-input
+        - click:class=select-checkBox[0,2]
+      steps: div.tc-job-box2,a.tc-job-link
+      stepTimeout: 3
+      parseTimeout: 10
+  - name: 'Universidad CEU San Pablo'
+    url: https://ceu.wd3.myworkdayjobs.com/es/usp
+    strategy:
+      type: jsRender
+      initialSteps:
+        - load:class=css-shvw01
+        - click:class=css-shvw01[2]
+        - click:class=css-1rmmx2s[0,2]
+        - click:class=css-19qp2dv
+        - wait:5
+      steps: a.css-19uc56f
+      stepTimeout: 3
+      parseTimeout: 10
+  - name: 'UAX: Universidad Alfonso X el Sabio'
+    url: https://candidatos.uax.es/p/ofertas
+    strategy:
+      type: jsRender
+      initialSteps:
+        - load:title=Portal Web del Candidato - JobSite
+        - load:class=area
+      steps: a.area,h4
+      stepTimeout: 3
+      parseTimeout: 10
 
 email:
   enabled: true
