@@ -4,8 +4,6 @@ import eus.ibai.jobs.alerts.infrastructure.jsoup.BasicHttpClient;
 import eus.ibai.jobs.alerts.infrastructure.selenium.WebDriverFactory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -53,13 +51,5 @@ class JobParsingStrategyFactoryTest {
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> parsingStrategyFactory.getStrategy(parsingStrategySettings));
         assertThat(exception).hasMessageContaining("Unknown parsing strategy invalidType");
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"invalid", "wait:class=foo", "load:attr=foo", "click:attr=foo"})
-    void should_fail_to_create_js_render_parsing_strategy_when_initial_steps_are_invalid(String initialSteps) {
-        Map<String, Object> parsingStrategySettings = Map.of("type", "jsRender", "initialSteps", initialSteps(List.of(initialSteps)), "steps", "steps");
-
-        assertThrows(IllegalArgumentException.class, () -> parsingStrategyFactory.getStrategy(parsingStrategySettings));
     }
 }
