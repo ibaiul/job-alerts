@@ -33,8 +33,9 @@ public class JsRenderParsingStrategy implements JobParsingStrategy {
     private final WebDriverFactory webDriverFactory;
 
     JsRenderParsingStrategy(List<String> initialSteps, String parsingSteps, int stepTimeout, int parseTimeout, WebDriverFactory webDriverFactory) {
+        JsStepParser stepParser = new JsStepParser();
         this.initialSteps = initialSteps.stream()
-                .map(JsStepParser::parseStep)
+                .map(stepParser::parseStep)
                 .toList();
         this.parsingSteps = parsingSteps;
         this.stepTimeout = stepTimeout;

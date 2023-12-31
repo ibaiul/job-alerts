@@ -9,9 +9,9 @@ public class JsStepParser {
 
     private static final Pattern STEP_LOAD_PATTERN = Pattern.compile("load:(id|class|title)=([a-zA-Z0-9_\\- ]+)");
 
-    private static final Pattern STEP_CLICK_PATTERN = Pattern.compile("click:(id|class)=([a-zA-Z0-9_\\-]+)(\\[(\\d+(,\\d+)*)\\])?");
+    private static final Pattern STEP_CLICK_PATTERN = Pattern.compile("click:(id|class)=([a-zA-Z0-9_\\-]+)(\\[(\\d+(,\\d+)*+)\\])?");
 
-    public static JsStep parseStep(String initialStep) {
+    public JsStep parseStep(String initialStep) {
         JsAction jsAction = JsAction.valueOf(initialStep.split(":")[0].toUpperCase());
         return switch (jsAction) {
             case WAIT -> {

@@ -13,10 +13,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class JsStepParserTest {
 
+    private final JsStepParser stepParser = new JsStepParser();
+
     @ParameterizedTest
     @MethodSource
     void should_parse_initial_steps(String initialStep, JsStep expectedStep) {
-        JsStep parsedStep = JsStepParser.parseStep(initialStep);
+        JsStep parsedStep = stepParser.parseStep(initialStep);
 
         assertThat(parsedStep).isEqualTo(expectedStep);
     }
@@ -24,7 +26,7 @@ class JsStepParserTest {
     @ParameterizedTest
     @MethodSource
     void should_fail_to_parse_invalid_initial_steps(String initialStep) {
-        assertThrows(IllegalArgumentException.class, () -> JsStepParser.parseStep(initialStep));
+        assertThrows(IllegalArgumentException.class, () -> stepParser.parseStep(initialStep));
     }
 
     private static Stream<Arguments> should_parse_initial_steps() {
