@@ -142,8 +142,10 @@ sites:
       type: jsRender
       initialSteps:
         - load:title=Portal Web del Candidato - JobSite
-      steps: a.area
-      waitSeconds: 10
+        - load:class=area
+      steps: a.area,h4
+      stepTimeout: 3
+      parseTimeout: 10
   - name: 'Universidad de Deusto'
     url: https://www.deusto.es/es/inicio/somos-deusto/equipo/trabaja-deusto
     strategy:
@@ -166,16 +168,6 @@ sites:
         - click:class=css-19qp2dv
         - wait:5
       steps: a.css-19uc56f
-      stepTimeout: 3
-      parseTimeout: 10
-  - name: 'UAX: Universidad Alfonso X el Sabio'
-    url: https://candidatos.uax.es/p/ofertas
-    strategy:
-      type: jsRender
-      initialSteps:
-        - load:title=Portal Web del Candidato - JobSite
-        - load:class=area
-      steps: a.area,h4
       stepTimeout: 3
       parseTimeout: 10
 
