@@ -5,7 +5,10 @@ import eus.ibai.jobs.alerts.infrastructure.selenium.WebDriverFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -21,9 +24,12 @@ public class JobParsingStrategyFactory {
         return switch (type) {
             case BasicHtmlParsingStrategy.TYPE -> new BasicHtmlParsingStrategy(steps, basicHttpClient, new JsoupJobParser());
             case JsRenderParsingStrategy.TYPE -> {
-                String waitUntil = parsingStrategyDefinition.get("waitUntil").toString();
-                int waitSeconds = (int) parsingStrategyDefinition.getOrDefault("waitSeconds", 5);
-                yield new JsRenderParsingStrategy(steps, waitUntil, waitSeconds, webDriverFactory);
+                List<String> initialSteps = Optional.ofNullable(parsingStrategyDefinition.get("initialSteps"))
+                        .map(o -> ((Map<String, String>) o).values().stream().toList())
+                        .orElse(Collections.emptyList());
+                int stepTimeout = (int) parsingStrategyDefinition.getOrDefault("stepTimeout", 3);
+                int parseTimeout = (int) parsingStrategyDefinition.getOrDefault("parseTimeout", 10);
+                yield new JsRenderParsingStrategy(initialSteps, steps, stepTimeout, parseTimeout, webDriverFactory);
             }
             default -> throw new IllegalArgumentException("Unknown parsing strategy " + type);
         };

@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 @Slf4j
 public class JsoupJobParser {
 
-    private static final Pattern QUERY_PATTERN = Pattern.compile("(.*)\\[(\\d+)\\]");
+    private static final Pattern ARRAY_SELECTION_PATTERN = Pattern.compile("(.*)\\[(\\d+)\\]");
 
     public Flux<Job> parseJobs(String html, String steps, String siteUrl) {
         String[] stepValues = steps.split(",");
@@ -31,7 +31,7 @@ public class JsoupJobParser {
     }
 
     private Elements processQuery(Elements elements, String query) {
-        Matcher matcher = QUERY_PATTERN.matcher(query);
+        Matcher matcher = ARRAY_SELECTION_PATTERN.matcher(query);
         if (matcher.matches()) {
             String actualQuery = matcher.group(1);
             int index = Integer.parseInt(matcher.group(2));

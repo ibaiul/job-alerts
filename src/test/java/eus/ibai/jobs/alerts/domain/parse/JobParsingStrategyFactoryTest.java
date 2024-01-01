@@ -8,8 +8,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Map;
 
+import static eus.ibai.jobs.alerts.TestData.initialSteps;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -23,7 +25,7 @@ class JobParsingStrategyFactoryTest {
     private WebDriverFactory webDriverFactory;
 
     @InjectMocks
-    JobParsingStrategyFactory parsingStrategyFactory;
+    private JobParsingStrategyFactory parsingStrategyFactory;
 
     @Test
     void should_create_basic_html_parsing_strategy() {
@@ -36,7 +38,7 @@ class JobParsingStrategyFactoryTest {
 
     @Test
     void should_create_js_render_parsing_strategy() {
-        Map<String, Object> parsingStrategySettings = Map.of("type", "jsRender", "steps", "steps", "waitUntil", "class=foo", "waitSeconds", 2);
+        Map<String, Object> parsingStrategySettings = Map.of("type", "jsRender", "initialSteps", initialSteps(List.of("load:class=foo")), "steps", "steps", "stepTimeout", 2, "parseTimeout", 5);
 
         JobParsingStrategy jobParsingStrategy = parsingStrategyFactory.getStrategy(parsingStrategySettings);
 
@@ -44,7 +46,7 @@ class JobParsingStrategyFactoryTest {
     }
 
     @Test
-    void should_throw_exception_when_parsing_strategy_type_is_invalid() {
+    void should_fail_to_create_parsing_strategy_when_type_is_invalid() {
         Map<String, Object> parsingStrategySettings = Map.of("type", "invalidType", "steps", "steps");
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> parsingStrategyFactory.getStrategy(parsingStrategySettings));

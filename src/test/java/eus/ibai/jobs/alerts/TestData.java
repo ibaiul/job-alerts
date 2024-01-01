@@ -1,5 +1,10 @@
 package eus.ibai.jobs.alerts;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import static java.lang.String.format;
 
 public class TestData {
@@ -101,6 +106,12 @@ public class TestData {
     public static final String JOB_2_URL_FORMAT = "%s/job2/details";
 
     private static final String JOB_2_RELATIVE_URL = "/job2/details";
+
+    public static Map<String, String> initialSteps(List<String> initialSteps) {
+        return IntStream.range(0, initialSteps.size())
+                .boxed()
+                .collect(Collectors.toMap(i -> Integer.toString(i), initialSteps::get));
+    }
 
     public static String jobSiteWithOneJobResponse(String wiremockBaseUrl) {
         return format("""
